@@ -1,0 +1,40 @@
+{
+  "extraKnownMarketplaces": {
+    "claude-blog": {
+      "source": {
+        "source": "github",
+        "repo": "AgriciDaniel/claude-blog"
+      }
+    },
+    "sociilabs": {
+      "source": {
+        "source": "github",
+        "repo": "sociilabs/claude-content-writer"
+      }
+    },
+    "humanizer": {
+      "source": {
+        "source": "github",
+        "repo": "blader/humanizer"
+      }
+    },
+    "avoid-ai-writing": {
+      "source": {
+        "source": "github",
+        "repo": "conorbronsdon/avoid-ai-writing"
+      }
+    },
+    "no-ai-slop": {
+      "source": {
+        "source": "github",
+        "repo": "realrossmanngroup/no_ai_slop_writing_rules"
+      }
+    },
+    "taste-skill": {
+      "source": {
+        "source": "github",
+        "repo": "Leonxlnx/taste-skill"
+      }
+    }
+  }
+}
