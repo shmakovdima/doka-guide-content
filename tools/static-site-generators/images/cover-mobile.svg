@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="700" viewBox="0 0 700 700" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif">
+  <rect width="700" height="700" fill="#0f1729"/>
+  <text x="50" y="100" fill="#fff" font-size="46" font-weight="800">Статические</text>
+  <text x="50" y="155" fill="#fff" font-size="46" font-weight="800">генераторы</text>
+  <text x="50" y="210" fill="#fff" font-size="46" font-weight="800">сайтов</text>
+  <text x="52" y="255" fill="#8aa0c8" font-size="24">Astro, Next.js, Hugo, Eleventy и другие</text>
+
+  <!-- море статики с островами интерактивности -->
+  <g transform="translate(50,300)">
+    <rect x="0" y="0" width="600" height="330" rx="16" fill="#1b2950"/>
+
+    <g stroke="#2c3d6b" stroke-width="2" fill="none" opacity="0.6">
+      <path d="M20,30 Q45,20 70,30 T120,30"/>
+      <path d="M480,30 Q505,20 530,30 T580,30"/>
+      <path d="M20,300 Q45,290 70,300 T120,300"/>
+      <path d="M480,300 Q505,290 530,300 T580,300"/>
+    </g>
+
+    <!-- остров 1 -->
+    <g transform="translate(40,40)">
+      <rect x="0" y="0" width="520" height="80" rx="14" fill="#254a8a"/>
+      <circle cx="490" cy="18" r="7" fill="#7cc4ff"/>
+      <text x="24" y="34" fill="#7cc4ff" font-size="22" font-weight="700">client:load</text>
+      <text x="24" y="62" fill="#9fb3d6" font-size="17" font-weight="400">интерактивный остров</text>
+    </g>
+
+    <!-- остров 2 -->
+    <g transform="translate(40,140)">
+      <rect x="0" y="0" width="520" height="80" rx="14" fill="#254a8a"/>
+      <circle cx="490" cy="18" r="7" fill="#9ad07a"/>
+      <text x="24" y="34" fill="#9ad07a" font-size="22" font-weight="700">client:visible</text>
+      <text x="24" y="62" fill="#9fb3d6" font-size="17" font-weight="400">гидрация по скроллу</text>
+    </g>
+
+    <!-- остров 3 -->
+    <g transform="translate(40,240)">
+      <rect x="0" y="0" width="520" height="80" rx="14" fill="#254a8a"/>
+      <circle cx="490" cy="18" r="7" fill="#f2b66d"/>
+      <text x="24" y="34" fill="#f2b66d" font-size="22" font-weight="700">client:idle</text>
+      <text x="24" y="62" fill="#9fb3d6" font-size="17" font-weight="400">гидрация в простое</text>
+    </g>
+  </g>
+</svg>

@@ -5,7 +5,7 @@ cover:
   author: shmakovdima
   desktop: "images/cover-desktop.png"
   mobile: "images/cover-mobile.png"
-  alt: "Схема сборки статического сайта: исходники превращаются в готовые HTML-файлы на этапе билда"
+  alt: "Три интерактивных острова с разными директивами гидрации — client:load, client:visible, client:idle — среди статичного фона"
 authors:
   - shmakovdima
 keywords:
