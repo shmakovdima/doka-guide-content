@@ -652,6 +652,8 @@ RU: `Declarative: существующая HTML-форма становится 
 
 Код для вставки в презу - imperative API:
 
+`document.modelContext.registerTool(...)` - это WebMCP API. Всё внутри `execute` - обычная логика сайта.
+
 ```js
 await document.modelContext.registerTool({
   name: 'getAvailability',
@@ -705,22 +707,27 @@ EN: `The booking widget exposes three typed tools.`
 
 RU: `Booking widget предоставляет три typed tools.`
 
-Визуал: только один code block с тремя сигнатурами и краткими return contracts. Без карточек, картинок и схем. Переход: сначала смотрим доступное время.
+Визуал: только один code block с тремя вызовами `document.modelContext.registerTool(...)`. Без карточек, картинок и схем. Переход: сначала смотрим доступное время.
 
 Код для вставки в презу:
 
 ```js
-getAvailability({ startDate, endDate })
-// -> { 'YYYY-MM-DD': ['09:00', '10:00', '14:00', ...], ... }
-
-bookSlot({ date, time, name, email })
-// -> { ok: true, confirmationId, date, time }
-
-cancelBooking({ confirmationId })
-// -> { ok: true, cancelled: confirmationId }
+// The page makes these tools visible to a WebMCP-aware agent.
+await document.modelContext.registerTool({
+  name: 'getAvailability', inputSchema: { startDate, endDate },
+  execute: handlers.getAvailability,
+});
+await document.modelContext.registerTool({
+  name: 'bookSlot', inputSchema: { date, time, name, email },
+  execute: handlers.bookSlot,
+});
+await document.modelContext.registerTool({
+  name: 'cancelBooking', inputSchema: { confirmationId },
+  execute: handlers.cancelBooking,
+});
 ```
 
-Что говорить: Это полный API официального demo, не придуманный набор для слайда. Сначала агент читает доступность по диапазону дат. Затем бронирует конкретный слот и получает `confirmationId`. Если нужно отменить запись, он передаёт этот идентификатор в третий tool. Дальше разберём каждый вызов, а не будем повторять этот список.
+Что говорить: Вот где начинается WebMCP. Страница не экспортирует обычные JavaScript-функции агенту. Она регистрирует каждый capability через `document.modelContext.registerTool`. Браузер передаёт name, description и schema совместимому агенту, а `execute` остаётся исполняться в коде сайта. В demo зарегистрированы три tools: прочитать доступность, забронировать и отменить. Дальше разберём их входы и результаты.
 
 ### 50. Read availability
 
@@ -733,6 +740,7 @@ RU: `getAvailability({ startDate, endDate })`
 Код для вставки в презу:
 
 ```js
+// Agent calls the WebMCP tool registered by the page.
 getAvailability({
   startDate: '2026-10-06', endDate: '2026-10-07',
 });
@@ -756,6 +764,7 @@ RU: `bookSlot({ date, time, name, email })`
 Код для вставки в презу:
 
 ```js
+// Agent calls the WebMCP tool registered by the page.
 const booking = await bookSlot({
   date: '2026-10-06', time: '14:00',
   name: 'Sarah Drasner', email: 'sarah@example.com',
@@ -778,6 +787,7 @@ RU: `cancelBooking использует confirmation id, который верн
 Код для вставки в презу:
 
 ```js
+// Agent calls the WebMCP tool registered by the page.
 const cancelled = await cancelBooking({
   confirmationId: 'BK-AB12CD',
 });
