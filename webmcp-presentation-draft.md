@@ -663,7 +663,7 @@ await document.modelContext.registerTool({
 });
 ```
 
-Результат вызова: `{"slots":[{"date":"2026-05-19","time":"14:00","durationMinutes":30}]}`
+Результат вызова: `{"slots":[{"date":"2026-05-19","time":"09:00","durationMinutes":30},{"date":"2026-05-19","time":"14:00","durationMinutes":30},{"date":"2026-05-19","time":"16:30","durationMinutes":30}]}`
 
 Код для вставки в презу - declarative API:
 
@@ -708,7 +708,7 @@ RU: `Страница предоставляет typed tools. Агент выз�
 ```js
 const { slots } = await getAvailability({
   startDate: '2026-05-19', endDate: '2026-05-19',
-}); // -> { slots: [{ date, time, durationMinutes }] }
+}); // -> { slots: [09:00, 14:00, 16:30] }
 
 const booking = await bookSlot({ date: '2026-05-19', time: '14:00', name, email });
 // -> { bookingId: 'bk_123', status: 'confirmed' }
@@ -730,7 +730,11 @@ RU: `getAvailability({ startDate, endDate })`
 const getAvailability = ({ startDate, endDate }) =>
   ({ slots: calendar.slotsBetween(startDate, endDate) });
 
-// -> { slots: [{ date: '2026-05-19', time: '14:00', durationMinutes: 30 }] }
+// -> { slots: [
+//      { date: '2026-05-19', time: '09:00', durationMinutes: 30 },
+//      { date: '2026-05-19', time: '14:00', durationMinutes: 30 },
+//      { date: '2026-05-19', time: '16:30', durationMinutes: 30 },
+//    ] }
 ```
 
 Что говорить: Первый imperative tool возвращает объект с bookable consultation times в заданном диапазоне дат. Агент получает `slots` со временем и длительностью, а не пытается прочитать и понять календарь.
@@ -751,6 +755,7 @@ const booking = await bookSlot({
   name: 'Sarah Drasner', email: 'sarah@example.com',
 });
 
+// 14:00 selected from [09:00, 14:00, 16:30]
 // -> { bookingId: 'bk_123', status: 'confirmed' }
 ```
 
