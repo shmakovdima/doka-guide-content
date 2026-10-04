@@ -435,14 +435,7 @@ EN: `The page registers tools from its own JavaScript or HTML.`
 
 RU: `Страница регистрирует инструменты через собственный JavaScript или HTML.`
 
-Визуал: только две строки кода на пустом фоне: imperative JavaScript и declarative HTML. Без картинок, иконок и схем. Переход: сайт объявляет конкретное действие.
-
-Код для вставки в презу:
-
-```js
-await document.modelContext.registerTool({ /* tool */ });
-// or: <form toolname="findDoctors">...</form>
-```
+Визуал: страница с уже существующей product logic внутри и отдельный MCP server, который больше не нужен. Переход: сайт объявляет конкретное действие.
 
 Что говорить: Для page-local сценария не обязательно поднимать отдельный MCP-сервер. Инструмент поставляется вместе со страницей и обновляется вместе с ней.
 
@@ -454,24 +447,11 @@ EN: `Name. Description. Input schema. Execute function.`
 
 RU: `Имя. Описание. Схема входных данных. Функция выполнения.`
 
-Визуал: только фрагмент `registerTool` размером не больше восьми строк. Без картинок, иконок и схем. Переход: дальше браузер становится посредником.
-
-Код для вставки в презу:
-
-```js
-await document.modelContext.registerTool({
-  name: 'findDoctors',
-  description: 'Find doctors by specialty and time.',
-  inputSchema: { type: 'object', properties: {
-    specialty: { type: 'string' }, afterTime: { type: 'string' },
-  }, required: ['specialty'] },
-  execute: async ({ specialty, afterTime }) => findDoctors({ specialty, afterTime }),
-});
-```
+Визуал: четыре крупные строки контракта: name, description, input schema, execute. Переход: дальше браузер становится посредником.
 
 Что говорить: Разработчик явно указывает назначение действия и допустимые параметры. Вместо поиска подходящей кнопки агент выбирает функцию по её смыслу.
 
-Источник: [WebMCP imperative API](https://developer.chrome.com/docs/ai/webmcp/imperative-api)
+Источник: [WebMCP specification](https://webmachinelearning.github.io/webmcp/)
 
 ### 32. The browser exposes registered tools
 
@@ -487,21 +467,11 @@ RU: `Браузер управляет обнаружением и вызово�
 
 ### 33. The agent chooses a business action
 
-EN: `The model selects "findDoctors" instead of searching the DOM.`
+EN: `The model selects a business action instead of searching the DOM.`
 
-RU: `Модель выбирает "findDoctors" вместо поиска по DOM.`
+RU: `Модель выбирает бизнес-действие вместо поиска по DOM.`
 
-Визуал: только вызов `findDoctors` и короткий structured result в code block. Без картинок, иконок и схем. Переход: инструмент вызывает код приложения.
-
-Код для вставки в презу:
-
-```js
-findDoctors({
-  specialty: 'dermatology',
-  afterTime: '19:00',
-});
-// -> [{ id, name, nextSlot }]
-```
+Визуал: запрос пользователя слева, выбранное действие `getAvailability` справа. Переход: инструмент вызывает код приложения.
 
 Что говорить: Агент сопоставляет цель пользователя с описанием инструмента. Ему не нужно сначала восстанавливать структуру карточек, фильтров и кнопок.
 
@@ -511,21 +481,11 @@ EN: `The tool calls the application code that already knows the workflow.`
 
 RU: `Инструмент вызывает код приложения, который уже знает сценарий.`
 
-Визуал: только функция `findDoctors` в code block, с подсветкой `renderDoctors` и `return`. Без картинок, иконок и схем. Переход: результат возвращается в видимую страницу.
-
-Код для вставки в презу:
-
-```js
-async function findDoctors(params) {
-  const doctors = await api.searchDoctors(params);
-  renderDoctors(doctors);
-  return doctors;
-}
-```
+Визуал: одна product function в центре, в неё входят UI и tool, из неё выходит результат. Переход: результат возвращается в видимую страницу.
 
 Что говорить: Выполнение остаётся внутри продукта. Сайт применяет свои правила, валидацию, состояние и обработку ошибок.
 
-Источник: [WebMCP imperative API](https://developer.chrome.com/docs/ai/webmcp/imperative-api)
+Источник: [WebMCP specification](https://webmachinelearning.github.io/webmcp/)
 
 ### 35. The visible interface updates
 
@@ -533,9 +493,9 @@ EN: `The person sees the result on the same page.`
 
 RU: `Человек видит результат на той же странице.`
 
-Визуал: обновившийся список врачей в обычном UI. Переход: всё происходит в текущей сессии.
+Визуал: обновившийся список доступных слотов в обычном UI. Переход: всё происходит в текущей сессии.
 
-Что говорить: WebMCP поддерживает совместную работу человека и агента. После вызова инструмента интерфейс показывает найденных врачей или подготовленную запись.
+Что говорить: WebMCP поддерживает совместную работу человека и агента. После вызова инструмента интерфейс показывает доступные слоты или созданное бронирование.
 
 Источник: [WebMCP proposal](https://webmachinelearning.github.io/webmcp/docs/proposal.html)
 
@@ -557,18 +517,7 @@ EN: `The UI and agent tool can share the same application functions.`
 
 RU: `UI и инструмент агента могут использовать одни функции приложения.`
 
-Визуал: только три строки общего handler в code block. Подсветить одно имя `search` в form handler и `registerTool`. Без картинок, иконок и схем. Переход: при значимом действии человек остаётся в цикле.
-
-Код для вставки в презу:
-
-```js
-const search = params => api.searchDoctors(params);
-form.addEventListener('submit', () => search(readForm()));
-await document.modelContext.registerTool({
-  name: 'findDoctors', description: 'Find doctors',
-  inputSchema: { type: 'object' }, execute: search,
-});
-```
+Визуал: одна product function в центре, от неё стрелки к обычной форме и к WebMCP tool. Переход: при значимом действии человек остаётся в цикле.
 
 Что говорить: Команда меньше дублирует логику. Если правила меняются в приложении, инструмент можно обновить в том же релизе.
 
