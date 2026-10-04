@@ -657,9 +657,13 @@ await document.modelContext.registerTool({
   name: 'getAvailability',
   description: 'List bookable consultation times.',
   inputSchema: availabilitySchema,
-  execute: ({ startDate, endDate }) => calendar.slotsBetween(startDate, endDate),
+  execute: ({ startDate, endDate }) => ({
+    slots: calendar.slotsBetween(startDate, endDate),
+  }),
 });
 ```
+
+Результат вызова: `{"slots":[{"date":"2026-05-19","time":"14:00","durationMinutes":30}]}`
 
 Код для вставки в презу - declarative API:
 
@@ -673,7 +677,7 @@ await document.modelContext.registerTool({
 </form>
 ```
 
-Что говорить: Представьте, что мы объясняем действие браузеру. Imperative API - это "я сам пишу функцию, которую должен вызвать агент". Разработчик вручную описывает параметры, пишет JavaScript и решает, что сделать внутри функции. Поэтому `getAvailability` объявлен imperative: он вычисляет диапазон дат, обращается к календарю и возвращает список слотов. Это вариант для динамической логики, нескольких запросов, навигации и сложных правил.
+Что говорить: Представьте, что мы объясняем действие браузеру. Imperative API - это "я сам пишу функцию, которую должен вызвать агент". Разработчик вручную описывает параметры, пишет JavaScript и решает, что сделать внутри функции. Поэтому `getAvailability` объявлен imperative: он вычисляет диапазон дат, обращается к календарю и возвращает объект со списком слотов. Это вариант для динамической логики, нескольких запросов, навигации и сложных правил.
 
 Declarative API - это "у меня уже есть хорошая HTML-форма, просто сделайте её tool". Разработчик добавляет атрибуты к форме, а браузер читает поля как схему параметров. Поэтому `bookSlot` можно сделать declarative: дата, время, имя и email уже существуют как обычные поля формы. Это быстрее, не дублирует UI и сохраняет форму видимой человеку, но подходит только для сценариев, которые естественно выражаются формой.
 
@@ -697,16 +701,20 @@ EN: `The page exposes typed tools. The agent calls them directly.`
 
 RU: `Страница предоставляет typed tools. Агент вызывает их напрямую.`
 
-Визуал: только три строки вызовов tools в code block, раскрывать по одной. Без карточек, картинок и схем. Переход: первый инструмент ищет врачей.
+Визуал: только code block вызовов tools и их результатов, раскрывать по одной. Без карточек, картинок и схем. Переход: первый инструмент ищет врачей.
 
 Код для вставки в презу:
 
 ```js
-getAvailability({ startDate: '2026-05-19', endDate: '2026-05-19' });
-bookSlot({ date: '2026-05-19', time: '14:00', name, email });
+const { slots } = await getAvailability({
+  startDate: '2026-05-19', endDate: '2026-05-19',
+}); // -> { slots: [{ date, time, durationMinutes }] }
+
+const booking = await bookSlot({ date: '2026-05-19', time: '14:00', name, email });
+// -> { bookingId: 'bk_123', status: 'confirmed' }
 ```
 
-Что говорить: В правой части demo агент видит контракт tools и передаёт структурированные аргументы. Ему не нужно искать нужную кнопку. Этот же flow становится короче, прозрачнее и проще для проверки.
+Что говорить: В правой части demo агент видит контракт tools, передаёт структурированные аргументы и получает структурированный результат. Сначала `slots`, затем `bookingId` и статус. Ему не нужно искать нужную кнопку. Этот же flow становится короче, прозрачнее и проще для проверки.
 
 ### 50. Read availability
 
@@ -720,10 +728,12 @@ RU: `getAvailability({ startDate, endDate })`
 
 ```js
 const getAvailability = ({ startDate, endDate }) =>
-  calendar.slotsBetween(startDate, endDate);
+  ({ slots: calendar.slotsBetween(startDate, endDate) });
+
+// -> { slots: [{ date: '2026-05-19', time: '14:00', durationMinutes: 30 }] }
 ```
 
-Что говорить: Первый imperative tool возвращает bookable consultation times в заданном диапазоне дат. Агент получает структурированный список слотов, а не пытается прочитать и понять календарь.
+Что говорить: Первый imperative tool возвращает объект с bookable consultation times в заданном диапазоне дат. Агент получает `slots` со временем и длительностью, а не пытается прочитать и понять календарь.
 
 ### 51. Book the selected slot
 
@@ -736,13 +746,15 @@ RU: `bookSlot({ date, time, name, email })`
 Код для вставки в презу:
 
 ```js
-bookSlot({
+const booking = await bookSlot({
   date: '2026-05-19', time: '14:00',
   name: 'Sarah Drasner', email: 'sarah@example.com',
 });
+
+// -> { bookingId: 'bk_123', status: 'confirmed' }
 ```
 
-Что говорить: Второй tool получает готовые структурированные данные и создаёт booking. В official demo этот же capability можно объявить как declarative HTML form.
+Что говорить: Второй tool получает готовые структурированные данные и создаёт booking. В ответ агент получает идентификатор созданной записи и её статус, например `confirmed`. В official demo этот же capability можно объявить как declarative HTML form.
 
 ### 52. The booking tool calls product logic
 
@@ -757,11 +769,12 @@ RU: `bookSlot проверяет данные перед созданием бр
 ```js
 async function bookSlot(input) {
   validateBooking(input);
-  return api.book(input);
+  const booking = await api.book(input);
+  return { bookingId: booking.id, status: 'confirmed' };
 }
 ```
 
-Что говорить: Tool вызывает существующую продуктовую функцию. WebMCP не обходит правила продукта: валидация, доступность и любые подтверждения остаются внутри приложения.
+Что говорить: Tool вызывает существующую продуктовую функцию и нормализует результат для агента: `bookingId` и `status`. WebMCP не обходит правила продукта: валидация, доступность и любые подтверждения остаются внутри приложения.
 
 ### 53. The application validates the action
 
@@ -774,12 +787,14 @@ RU: `Сайт проверяет доступность, права и данн�
 Код для вставки в презу:
 
 ```js
-assertCanBook(user, input.patientId);
-await assertSlotAvailable(input.slotId);
+if (!canBook(user, input.patientId))
+  return { error: 'FORBIDDEN' };
+if (!(await isSlotAvailable(input.slotId)))
+  return { error: 'SLOT_UNAVAILABLE' };
 validatePatient(input.patient);
 ```
 
-Что говорить: Схема помогает сформировать запрос, но не заменяет безопасность. Приложение повторно проверяет входные данные и право пользователя выполнить операцию.
+Что говорить: Схема помогает сформировать запрос, но не заменяет безопасность. Приложение повторно проверяет входные данные и право пользователя выполнить операцию. При отказе tool возвращает понятный структурированный результат, например `FORBIDDEN` или `SLOT_UNAVAILABLE`, а не молча продолжает flow.
 
 ### 54. The page shows the prepared result
 
