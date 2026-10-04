@@ -754,7 +754,14 @@ EN: `findDoctors({ specialty, afterTime, location })`
 
 RU: `findDoctors({ specialty, afterTime, location })`
 
-Визуал: крупный вызов `findDoctors` и короткий структурированный ответ. Переход: затем агент запрашивает слоты конкретного врача.
+Визуал: только code block поиска врачей. Без картинок, иконок и схем. Переход: затем агент запрашивает слоты конкретного врача.
+
+Код для вставки в презу:
+
+```js
+const findDoctors = ({ specialty, afterTime, location }) =>
+  api.doctors.search({ specialty, afterTime, location });
+```
 
 Что говорить: Первый инструмент принимает смысловые параметры запроса. Агент получает подходящих врачей без чтения каждой карточки на странице.
 
@@ -764,7 +771,14 @@ EN: `getAvailableSlots({ doctorId, dateRange })`
 
 RU: `getAvailableSlots({ doctorId, dateRange })`
 
-Визуал: `getAvailableSlots` и три времени без календарной сетки. Переход: выбранный слот передаётся в подготовку записи.
+Визуал: только code block свободных слотов. Без картинок, иконок и схем. Переход: выбранный слот передаётся в подготовку записи.
+
+Код для вставки в презу:
+
+```js
+const getAvailableSlots = ({ doctorId, dateRange }) =>
+  api.slots.list({ doctorId, dateRange });
+```
 
 Что говорить: Второй инструмент возвращает структурированные свободные слоты. Календарь остаётся удобным интерфейсом для человека, но перестаёт быть препятствием для агента.
 
@@ -774,7 +788,17 @@ EN: `prepareAppointment({ doctorId, slotId, patient })`
 
 RU: `prepareAppointment({ doctorId, slotId, patient })`
 
-Визуал: `prepareAppointment` и статус `prepared`. Переход: сайт всё равно обязан проверить действие.
+Визуал: только code block подготовки записи. Без картинок, иконок и схем. Переход: сайт всё равно обязан проверить действие.
+
+Код для вставки в презу:
+
+```js
+async function prepareAppointment(input) {
+  const appointment = await api.appointments.prepare(input);
+  renderConfirmation(appointment);
+  return { status: 'prepared', appointment };
+}
+```
 
 Что говорить: Третий инструмент заполняет данные и подготавливает запись. Он не завершает значимое действие без участия человека.
 
@@ -784,7 +808,15 @@ EN: `The site checks availability, permissions, and patient data.`
 
 RU: `Сайт проверяет доступность, права и данные пациента.`
 
-Визуал: shield вокруг validation, permissions и availability. Переход: после проверки сайт обновляет привычный UI.
+Визуал: только code block валидации. Без картинок, иконок и схем. Переход: после проверки сайт обновляет привычный UI.
+
+Код для вставки в презу:
+
+```js
+assertCanBook(user, input.patientId);
+await assertSlotAvailable(input.slotId);
+validatePatient(input.patient);
+```
 
 Что говорить: Схема помогает сформировать запрос, но не заменяет безопасность. Приложение повторно проверяет входные данные и право пользователя выполнить операцию.
 
