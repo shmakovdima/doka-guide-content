@@ -640,9 +640,13 @@ RU: `Запрос: «Запиши меня во вторник на 14:00».`
 
 ### 47. Two ways to expose the booking flow
 
-EN: `Imperative tools read availability. A declarative form books a slot.`
+EN: `Imperative: custom JavaScript for dynamic product logic.`
 
-RU: `Imperative tools читают доступность. Declarative form бронирует слот.`
+EN: `Declarative: an existing HTML form becomes a tool with almost no wiring.`
+
+RU: `Imperative: кастомный JavaScript для динамической логики продукта.`
+
+RU: `Declarative: существующая HTML-форма становится tool почти без обвязки.`
 
 Визуал: только два code block рядом: imperative JavaScript и declarative HTML form. Без картинок, иконок и схем. Переход: попробуем это локально.
 
@@ -669,7 +673,7 @@ await document.modelContext.registerTool({
 </form>
 ```
 
-Что говорить: В этом demo availability объявлена через imperative API, а booking form можно объявить через declarative API. Это не два конкурирующих протокола, а два способа дать странице tools. Дальше сравним, что происходит с тем же widget без WebMCP.
+Что говорить: Выбор простой. Imperative API нужен, когда tool вызывает произвольную product logic: динамическое состояние, навигацию, запросы, несколько шагов и сложные правила. Он гибче, но разработчик пишет JavaScript и схему. Declarative API нужен, когда действие уже выражено семантической HTML-формой. Он быстрее добавляется, меньше дублирует UI и форма остаётся видимой человеку, но ограничен формовыми сценариями. `toolautosubmit` добавляют только когда автоматическая отправка действительно уместна.
 
 Источник: [Imperative API](https://developer.chrome.com/docs/ai/webmcp/imperative-api), [Declarative API](https://developer.chrome.com/docs/ai/webmcp/declarative-api)
 
