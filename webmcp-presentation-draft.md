@@ -81,10 +81,6 @@ RU: `[Имя] / [компания или проект] / [контакт]`
 
 ## Part 1. MCP solves service integration
 
-EN: MCP gives AI clients one common way to use external tools and data. It replaces many custom integrations with one shared protocol.
-
-RU: MCP даёт AI-клиентам единый способ работать с внешними инструментами и данными. Он заменяет множество отдельных интеграций одним общим протоколом.
-
 ### 1. Who has used MCP?
 
 EN: `Who has already installed or used an MCP server?`
@@ -117,9 +113,13 @@ RU: `Каждому AI-клиенту требовалась отдельная 
 
 ### 4. Model Context Protocol
 
-EN: `MCP is a shared protocol for tools and data.`
+EN: `AI clients need one common way to connect to tools and data.`
 
-RU: `MCP - общий протокол для инструментов и данных.`
+EN: `MCP replaces many custom integrations with one shared protocol.`
+
+RU: `AI-клиентам нужен единый способ подключаться к инструментам и данным.`
+
+RU: `MCP заменяет множество отдельных интеграций одним общим протоколом.`
 
 Визуал: один крупный разъём MCP между клиентом и сервером. Переход: стандарт начинается с общего контракта.
 
