@@ -433,6 +433,13 @@ RU: `Страница регистрирует инструменты через
 
 Визуал: страница с JavaScript и HTML, отдельный сервер перечёркнут. Переход: сайт объявляет конкретное действие.
 
+Код для вставки в презу:
+
+```js
+await document.modelContext.registerTool({ /* tool */ });
+// or: <form toolname="findDoctors">...</form>
+```
+
 Что говорить: Для page-local сценария не обязательно поднимать отдельный MCP-сервер. Инструмент поставляется вместе со страницей и обновляется вместе с ней.
 
 Источник: [WebMCP proposal](https://webmachinelearning.github.io/webmcp/docs/proposal.html)
@@ -482,6 +489,16 @@ RU: `Модель выбирает "findDoctors" вместо поиска по 
 
 Визуал: запрос пользователя и выбранный `findDoctors`. Переход: инструмент вызывает код приложения.
 
+Код для вставки в презу:
+
+```js
+findDoctors({
+  specialty: 'dermatology',
+  afterTime: '19:00',
+});
+// -> [{ id, name, nextSlot }]
+```
+
 Что говорить: Агент сопоставляет цель пользователя с описанием инструмента. Ему не нужно сначала восстанавливать структуру карточек, фильтров и кнопок.
 
 ### 34. The page executes its own logic
@@ -491,6 +508,16 @@ EN: `The tool calls the application code that already knows the workflow.`
 RU: `Инструмент вызывает код приложения, который уже знает сценарий.`
 
 Визуал: одна функция приложения с двумя входами: UI и WebMCP. Переход: результат возвращается в видимую страницу.
+
+Код для вставки в презу:
+
+```js
+async function findDoctors(params) {
+  const doctors = await api.searchDoctors(params);
+  renderDoctors(doctors);
+  return doctors;
+}
+```
 
 Что говорить: Выполнение остаётся внутри продукта. Сайт применяет свои правила, валидацию, состояние и обработку ошибок.
 
@@ -527,6 +554,17 @@ EN: `The UI and agent tool can share the same application functions.`
 RU: `UI и инструмент агента могут использовать одни функции приложения.`
 
 Визуал: одна функция в центре, которой пользуются форма и tool. Переход: при значимом действии человек остаётся в цикле.
+
+Код для вставки в презу:
+
+```js
+const search = params => api.searchDoctors(params);
+form.addEventListener('submit', () => search(readForm()));
+await document.modelContext.registerTool({
+  name: 'findDoctors', description: 'Find doctors',
+  inputSchema: { type: 'object' }, execute: search,
+});
+```
 
 Что говорить: Команда меньше дублирует логику. Если правила меняются в приложении, инструмент можно обновить в том же релизе.
 
