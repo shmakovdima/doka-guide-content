@@ -1035,9 +1035,64 @@ RU: `Lighthouse предупреждает, если страница регис
 
 Источник: [Registered WebMCP tools audit](https://developer.chrome.com/docs/lighthouse/agentic-browsing/registered-webmcp-tools)
 
+## Part 6.5. Since February: WebMCP API migration
+
+### 69. The WebMCP entry point moved
+
+EN: `navigator.modelContext became document.modelContext.`
+
+RU: `navigator.modelContext стал document.modelContext.`
+
+Визуал: только один code block с before и current API. Без картинок, иконок и схем. Переход: изменилось не только имя объекта.
+
+Код для вставки в презу:
+
+```js
+// February-era code
+await navigator.modelContext.registerTool(tool);
+
+// Current WebMCP API
+await document.modelContext.registerTool(tool);
+
+// Temporary compatibility during migration
+const modelContext = document.modelContext ?? navigator.modelContext;
+await modelContext.registerTool(tool);
+```
+
+Что говорить: Это реальный breaking change, а не косметика. 27 мая 2026 спецификация перенесла `modelContext` с `Navigator` на `Document`, а Chrome 150 сделал `navigator.modelContext` deprecated alias. В новом коде пишем `document.modelContext`. Fallback нужен только на время миграции старых browser builds и polyfills.
+
+Источник: [WebMCP PR #184 - move modelContext to Document](https://github.com/webmachinelearning/webmcp/pull/184), [Chrome Imperative API](https://developer.chrome.com/docs/ai/webmcp/imperative-api)
+
+### 70. Two more migration changes
+
+EN: `AbortSignal replaces unregisterTool; pass objects, not JSON strings.`
+
+RU: `AbortSignal заменяет unregisterTool; передавайте object, а не JSON string.`
+
+Визуал: только один code block с before и current API. Без картинок, иконок и схем. Переход: поэтому WebMCP всё ещё нужно считать экспериментальной платформой.
+
+Код для вставки в презу:
+
+```js
+// Removed from the draft
+document.modelContext.unregisterTool(tool);
+executeTool(tool, JSON.stringify({ date, time }));
+
+// Current WebMCP lifecycle and invocation
+const controller = new AbortController();
+await document.modelContext.registerTool(tool, { signal: controller.signal });
+controller.abort(); // unregisters the tool
+
+await document.modelContext.executeTool(tool, { date, time });
+```
+
+Что говорить: В апрельском draft `unregisterTool()` убрали: lifecycle tool теперь управляется через `AbortSignal`. А JSON-string arguments для `executeTool` устаревают с Chrome 155 - передаём обычный JavaScript object. Это важный вывод для команды: примеры из февраля нельзя копировать без проверки версии API.
+
+Источник: [Chrome Imperative API - unregister and execute](https://developer.chrome.com/docs/ai/webmcp/imperative-api)
+
 ## Part 7. Agentic SEO and current support
 
-### 69. Agentic browsing changes the SEO question
+### 71. Agentic browsing changes the SEO question
 
 EN: `A page must be findable and usable by an agent.`
 
@@ -1049,7 +1104,7 @@ RU: `Страница должна быть доступна для поиска
 
 Источник: [Chrome agent-ready toolkit](https://developer.chrome.com/blog/agent-ready-toolkit)
 
-### 70. WebMCP describes what a page can do
+### 72. WebMCP describes what a page can do
 
 EN: `The site exposes actions, not only content and links.`
 
@@ -1061,7 +1116,7 @@ RU: `Сайт предоставляет действия, а не только 
 
 Источник: [Chrome agent-friendly websites](https://developer.chrome.com/docs/ai/agents)
 
-### 71. Lighthouse has Agentic Browsing audits
+### 73. Lighthouse has Agentic Browsing audits
 
 EN: `Lighthouse evaluates signals that matter to browser agents.`
 
@@ -1073,7 +1128,7 @@ RU: `Lighthouse проверяет сигналы, важные для брау�
 
 Источник: [Lighthouse Agentic Browsing](https://developer.chrome.com/docs/lighthouse/agentic-browsing/)
 
-### 72. Lighthouse lists registered WebMCP tools
+### 74. Lighthouse lists registered WebMCP tools
 
 EN: `The audit detects imperative and declarative page tools.`
 
@@ -1085,7 +1140,7 @@ RU: `Аудит обнаруживает императивные и декла�
 
 Источник: [Registered WebMCP tools audit](https://developer.chrome.com/docs/lighthouse/agentic-browsing/registered-webmcp-tools)
 
-### 73. PageSpeed Insights shows the same direction
+### 75. PageSpeed Insights shows the same direction
 
 EN: `Agentic readiness is entering mainstream website diagnostics.`
 
@@ -1097,7 +1152,7 @@ RU: `Готовность к агентам входит в привычную �
 
 Источник: [Lighthouse Agentic Browsing scoring](https://developer.chrome.com/docs/lighthouse/agentic-browsing/scoring), [PageSpeed Insights](https://pagespeed.web.dev/)
 
-### 74. WebMCP is not a confirmed ranking factor
+### 76. WebMCP is not a confirmed ranking factor
 
 EN: `Treat it as agent readiness, not a promise of higher Google rankings.`
 
@@ -1107,7 +1162,7 @@ RU: `Это готовность к агентам, а не обещание б�
 
 Что говорить: Не обещаем SEO-магии. Сегодня WebMCP означает, что сайт становится понятнее и полезнее для агентов. Публичного подтверждения влияния на ранжирование нет.
 
-### 75. WebMCP is still experimental
+### 77. WebMCP is still experimental
 
 EN: `The API and browser behavior may change.`
 
@@ -1119,7 +1174,7 @@ RU: `API и поведение браузеров могут изменитьс�
 
 Источник: [WebMCP specification status](https://webmachinelearning.github.io/webmcp/)
 
-### 76. Current browser tooling
+### 78. Current browser tooling
 
 EN: `Chrome provides flags, Origin Trial, DevTools, and Lighthouse support.`
 
@@ -1131,7 +1186,7 @@ RU: `Chrome предоставляет флаги, Origin Trial, DevTools и п�
 
 Источник: [WebMCP implementation status](https://github.com/webmachinelearning/webmcp/blob/main/implementation-status.md), [Chrome WebMCP](https://developer.chrome.com/docs/ai/webmcp/)
 
-### 77. Current agent support
+### 79. Current agent support
 
 EN: `Compatible agents can discover and invoke tools from the active page.`
 
@@ -1145,7 +1200,7 @@ RU: `Совместимые агенты могут находить и вызы
 
 ## Part 8. Try WebMCP today
 
-### 78. Enable local testing
+### 80. Enable local testing
 
 EN: `chrome://flags/#enable-webmcp-testing`
 
@@ -1157,7 +1212,7 @@ RU: `chrome://flags/#enable-webmcp-testing`
 
 Источник: [Chrome WebMCP local testing](https://developer.chrome.com/docs/ai/webmcp/)
 
-### 79. Run the official booking demo live
+### 81. Run the official booking demo live
 
 EN: `Run agent: "Book me Tuesday at 2pm."`
 
@@ -1169,7 +1224,7 @@ RU: `Запустите агента: «Запиши меня во вторни�
 
 Источник: [Official booking demo](https://googlechromelabs.github.io/webmcp-tools/demos/explainer/)
 
-### 80. Run a tool in DevTools
+### 82. Run a tool in DevTools
 
 EN: `Review the schema, invoke the tool, and inspect the result.`
 
@@ -1181,7 +1236,7 @@ RU: `Проверьте схему, вызовите инструмент и и�
 
 Источник: [WebMCP DevTools panel](https://developer.chrome.com/docs/devtools/application/webmcp)
 
-### 81. Add one safe action
+### 83. Add one safe action
 
 EN: `Start with search, filtering, preview, or availability.`
 
@@ -1205,7 +1260,7 @@ await document.modelContext.registerTool({
 
 Что говорить: Не начинаем с покупки или удаления. Один read-only инструмент даст команде опыт и не создаст высокий риск для пользователя.
 
-### 82. Questions
+### 84. Questions
 
 EN: `Try one WebMCP tool this week`
 
