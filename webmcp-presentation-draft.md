@@ -709,6 +709,8 @@ RU: `Booking widget предоставляет три typed tools.`
 
 Визуал: только один code block с тремя вызовами `document.modelContext.registerTool(...)`. Без карточек, картинок и схем. Переход: сначала смотрим доступное время.
 
+Источник кода: [Official WebMCP explainer demo](https://googlechromelabs.github.io/webmcp-tools/demos/explainer/)
+
 Код для вставки в презу:
 
 ```js
