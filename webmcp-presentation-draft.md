@@ -737,23 +737,31 @@ EN: `getAvailability({ startDate, endDate })`
 
 RU: `getAvailability({ startDate, endDate })`
 
-Визуал: только code block доступных слотов. Без картинок, иконок и схем. Переход: агент передаёт выбранные дату и время в booking tool.
+Визуал: только code block реальной регистрации `getAvailability` и её return value. Без картинок, иконок и схем. Переход: агент передаёт выбранные дату и время в booking tool.
 
 Код для вставки в презу:
 
 ```js
-// Agent calls the WebMCP tool registered by the page.
-getAvailability({
-  startDate: '2026-10-06', endDate: '2026-10-07',
+// Page-side WebMCP code from the official demo.
+await document.modelContext.registerTool({
+  name: 'getAvailability',
+  title: 'Get booking availability',
+  description: 'List bookable consultation times within a date range.',
+  inputSchema: availabilitySchema,
+  annotations: { readOnlyHint: true },
+  execute: ({ startDate, endDate }) => {
+    const out = {};
+    Object.keys(AVAILABILITY).forEach((iso) => {
+      if (iso >= startDate && iso <= endDate) out[iso] = AVAILABILITY[iso];
+    });
+    return out;
+  },
 });
 
-// -> {
-//   '2026-10-06': ['09:00', '10:00', '14:00', '15:00', '16:00'],
-//   '2026-10-07': ['09:00', '11:00', '14:00', '16:00'],
-// }
+// execute(...) returns: { 'YYYY-MM-DD': ['HH:MM', 'HH:MM', ...], ... }
 ```
 
-Что говорить: Первый imperative tool возвращает не один слот и не массив карточек. Его контракт - объект: ключ это ISO-дата, значение это все доступные времена в этот день. Агент сразу видит варианты и выбирает один, не пытаясь прочитать календарь.
+Что говорить: Вот настоящий WebMCP-код: страница вызывает `document.modelContext.registerTool`. Она даёт tool имя, schema входных параметров, аннотацию `readOnlyHint` и handler `execute`. Только `execute` возвращает доступность: ключ это ISO-дата, значение это все доступные времена в этот день. Агент получает этот контракт через браузер и выбирает вариант, не читая календарь.
 
 ### 51. Book the selected slot
 
@@ -761,22 +769,35 @@ EN: `bookSlot({ date, time, name, email })`
 
 RU: `bookSlot({ date, time, name, email })`
 
-Визуал: только code block вызова `bookSlot`. Без картинок, иконок и схем. Переход: tool передаёт данные в логику бронирования.
+Визуал: только code block реальной регистрации `bookSlot` и её return value. Без картинок, иконок и схем. Переход: tool передаёт данные в логику бронирования.
 
 Код для вставки в презу:
 
 ```js
-// Agent calls the WebMCP tool registered by the page.
-const booking = await bookSlot({
-  date: '2026-10-06', time: '14:00',
-  name: 'Sarah Drasner', email: 'sarah@example.com',
+// Page-side WebMCP code from the official demo.
+await document.modelContext.registerTool({
+  name: 'bookSlot',
+  title: 'Book a consultation slot',
+  description: 'Reserve a 30-minute consultation at a specific date and time.',
+  inputSchema: bookingSchema,
+  annotations: { readOnlyHint: false },
+  async execute({ date, time, name, email }) {
+    widgetWith.jumpToMonth(new Date(date + 'T00:00'));
+    widgetWith.selectDate(date);
+    widgetWith.selectSlot(time);
+    widgetWith.setName(name);
+    widgetWith.setEmail(email);
+    widgetWith.confirm();
+    const c = widgetWith.state.confirmed;
+    if (!c) return { ok: false, error: 'Slot unavailable or input invalid.' };
+    return { ok: true, confirmationId: c.id, date: c.date, time: c.time };
+  },
 });
 
-// 14:00 selected from the available times on 2026-10-06
-// -> { ok: true, confirmationId: 'BK-AB12CD', date: '2026-10-06', time: '14:00' }
+// execute(...) returns: { ok: true, confirmationId, date, time }
 ```
 
-Что говорить: Второй tool получает выбранные дату и время, имя и email. При успехе demo возвращает `ok: true`, идентификатор подтверждения, дату и время. `confirmationId` нужен не для красоты: он становится входом в третий tool. В official demo этот же capability можно объявить как declarative HTML form.
+Что говорить: Это второй настоящий WebMCP registration. `execute` делает обычные действия интерфейса сайта, но наружу возвращает компактный контракт: `ok`, `confirmationId`, дату и время. `confirmationId` нужен не для красоты: он становится входом в третий tool. В official demo этот же capability можно объявить как declarative HTML form.
 
 ### 52. Cancel a booking
 
@@ -784,20 +805,31 @@ EN: `cancelBooking uses the confirmation id returned by bookSlot.`
 
 RU: `cancelBooking использует confirmation id, который вернул bookSlot.`
 
-Визуал: только code block `cancelBooking`. Без картинок, иконок и схем. Переход: каждый mutating tool всё равно обязан сообщать об ошибке ясно.
+Визуал: только code block реальной регистрации `cancelBooking` и её return value. Без картинок, иконок и схем. Переход: каждый mutating tool всё равно обязан сообщать об ошибке ясно.
 
 Код для вставки в презу:
 
 ```js
-// Agent calls the WebMCP tool registered by the page.
-const cancelled = await cancelBooking({
-  confirmationId: 'BK-AB12CD',
+// Page-side WebMCP code from the official demo.
+await document.modelContext.registerTool({
+  name: 'cancelBooking',
+  title: 'Cancel a booking',
+  description: 'Cancel a previously confirmed booking by its confirmation id.',
+  inputSchema: cancellationSchema,
+  annotations: { readOnlyHint: false },
+  execute({ confirmationId }) {
+    if (confirmationId !== widgetWith.state.confirmed?.id) {
+      return { ok: false, error: 'Confirmation id invalid.' };
+    }
+    widgetWith.reset();
+    return { ok: true, cancelled: confirmationId };
+  },
 });
 
-// -> { ok: true, cancelled: 'BK-AB12CD' }
+// execute(...) returns: { ok: true, cancelled: confirmationId }
 ```
 
-Что говорить: Третий официальный tool отменяет ранее созданную запись. Он не ищет кнопку Cancel в DOM, а получает ровно тот `confirmationId`, который вернул `bookSlot`. Так результаты одного tool становятся надёжными входными данными другого.
+Что говорить: Это третья регистрация WebMCP tool. Он не ищет кнопку Cancel в DOM, а получает ровно тот `confirmationId`, который вернул `bookSlot`. Внутри `execute` сайт проверяет id, обновляет свой UI и возвращает результат. Так результаты одного tool становятся надёжными входными данными другого.
 
 ### 53. The demo returns a clear error
 
@@ -805,19 +837,31 @@ EN: `bookSlot returns either a confirmation or a readable error.`
 
 RU: `bookSlot возвращает либо подтверждение, либо понятную ошибку.`
 
-Визуал: только code block результата `bookSlot`. Без картинок, иконок и схем. Переход: после успеха сайт обновляет привычный UI.
+Визуал: только code block WebMCP registration с ошибкой из `execute`. Без картинок, иконок и схем. Переход: после успеха сайт обновляет привычный UI.
 
 Код для вставки в презу:
 
 ```js
-const c = widgetWith.state.confirmed;
-if (!c) {
-  return { ok: false, error: 'Slot unavailable or input invalid.' };
-}
-return { ok: true, confirmationId: c.id, date: c.date, time: c.time };
+await document.modelContext.registerTool({
+  name: 'bookSlot',
+  inputSchema: bookingSchema,
+  async execute({ date, time, name, email }) {
+    widgetWith.jumpToMonth(new Date(date + 'T00:00'));
+    widgetWith.selectDate(date);
+    widgetWith.selectSlot(time);
+    widgetWith.setName(name);
+    widgetWith.setEmail(email);
+    widgetWith.confirm();
+    const c = widgetWith.state.confirmed;
+    if (!c) {
+      return { ok: false, error: 'Slot unavailable or input invalid.' };
+    }
+    return { ok: true, confirmationId: c.id, date: c.date, time: c.time };
+  },
+});
 ```
 
-Что говорить: Это ровно логика официального demo. Если widget не смог подтвердить запись, агент получает `ok: false` и текст ошибки. В реальном продукте к этому добавляются серверная валидация, авторизация и подтверждение значимых действий, но контракт ошибки должен оставаться таким же ясным.
+Что говорить: Это снова WebMCP tool registration, а не отдельный обработчик. Если `execute` не смог подтвердить запись, агент получает `ok: false` и текст ошибки. В реальном продукте к этому добавляются серверная валидация, авторизация и подтверждение значимых действий, но контракт ошибки должен оставаться таким же ясным.
 
 ### 54. The page shows the prepared result
 
@@ -1182,6 +1226,7 @@ RU: `[Имя] / [контакт] / [короткая ссылка на мате�
 ### Imperative API
 
 ```js
+// Ordinary product handler. The WebMCP registration below exposes it to the agent.
 async function findDoctors({ specialty, afterTime }) {
   const params = new URLSearchParams({ specialty, afterTime });
   const response = await fetch(`/api/doctors?${params}`);
@@ -1208,6 +1253,7 @@ if (document.modelContext) {
 ### Declarative API with human confirmation
 
 ```html
+<!-- Declarative WebMCP API: this form itself becomes a tool. -->
 <form toolname="checkAvailability"
       tooldescription="Check appointment availability for a doctor.">
   <label>
