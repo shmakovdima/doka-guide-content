@@ -1140,6 +1140,55 @@ RU: `[Имя] / [контакт] / [короткая ссылка на мате�
 
 Что говорить: Финальный призыв простой: не ждать стабильности всей платформы, а попробовать один безопасный инструмент на реальной странице. Оставляем контакты и ссылку на демо, документацию и исходный код.
 
+## Appendix - copy-paste WebMCP demo
+
+Этот пример можно показать отдельным code slide или разрезать на два слайда. Он намеренно короткий: функция приложения остаётся общей для UI и WebMCP, а форма сохраняет ручное подтверждение.
+
+### Imperative API
+
+```js
+async function findDoctors({ specialty, afterTime }) {
+  const params = new URLSearchParams({ specialty, afterTime });
+  const response = await fetch(`/api/doctors?${params}`);
+  return response.json();
+}
+
+if (document.modelContext) {
+  await document.modelContext.registerTool({
+    name: 'findDoctors',
+    description: 'Find doctors by specialty after a given time.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        specialty: { type: 'string' },
+        afterTime: { type: 'string' },
+      },
+      required: ['specialty', 'afterTime'],
+    },
+    execute: findDoctors,
+  });
+}
+```
+
+### Declarative API with human confirmation
+
+```html
+<form toolname="checkAvailability"
+      tooldescription="Check appointment availability for a doctor.">
+  <label>
+    Doctor ID
+    <input name="doctorId" required>
+  </label>
+  <label>
+    Date
+    <input name="date" type="date" required>
+  </label>
+  <button type="submit">Check availability</button>
+</form>
+```
+
+Без `toolautosubmit` браузер заполнит форму, но финальный submit останется за человеком.
+
 ## Complete comparison - MCP, browser automation, and WebMCP
 
 | Критерий | MCP | Browser automation | WebMCP | Источник |
