@@ -379,13 +379,13 @@ RU: `Кнопка говорит "Продолжить". Только сайт �
 
 ### 27. Cost checkpoint: browser automation
 
-EN: `No site integration. More observation, reasoning, retries, and latency.`
+EN: `No site integration. More tokens, model turns, waiting, and retries.`
 
-RU: `Нет интеграции с сайтом. Больше наблюдений, рассуждений, повторов и задержки.`
+RU: `Нет интеграции с сайтом. Больше токенов, model turns, ожидания и повторов.`
 
-Визуал: cost card, где подсвечены model work, latency и fragility. Переход: есть второй путь - дать агенту бизнес-инструменты через обычный MCP.
+Визуал: cost card с тремя крупными строками: tokens, time, compute. Подсветить все три. Переход: есть второй путь - дать агенту бизнес-инструменты через обычный MCP.
 
-Что говорить: Browser automation экономит работу владельца сайта, потому что запускается без его участия. Цена переносится в агентский цикл: больше данных попадает в модель, больше шагов требуется для действия, а изменение интерфейса повышает риск повтора.
+Что говорить: Browser automation экономит работу владельца сайта, потому что запускается без его участия. Но каждый сценарий платит агентскими ресурсами: snapshots и screenshots расходуют контекст, дополнительные шаги увеличивают время, а retries тратят вычисления и деньги.
 
 Источник: [Playwright MCP snapshots](https://github.com/microsoft/playwright.dev/blob/main/mcp/snapshots.mdx), [Playwright MCP repository](https://github.com/microsoft/playwright-mcp)
 
@@ -630,13 +630,17 @@ RU: `Агент может подготовить действие. Страни
 
 ### 47. Cost checkpoint: WebMCP
 
-EN: `Small page integration. Less setup and less interface reconstruction.`
+EN: `WebMCP moves cost from every agent run to one page integration.`
 
-RU: `Небольшая интеграция в страницу. Меньше настройки и восстановления интерфейса.`
+EN: `Fewer tokens. Less waiting. Less duplicated connector infrastructure.`
 
-Визуал: cost card, где setup и model work ниже, а developer work остаётся. Переход: экономия не означает, что WebMCP заменяет MCP.
+RU: `WebMCP переносит стоимость с каждого запуска агента в одну интеграцию со страницей.`
 
-Что говорить: WebMCP переносит часть работы к разработчику сайта, который лучше всех знает смысл действий. Взамен посетителю не нужен отдельный пакет, а агенту не нужно многократно восстанавливать сценарий по DOM. Экономия зависит от конкретной страницы и требует измерения.
+RU: `Меньше токенов. Меньше ожидания. Меньше дублирующей инфраструктуры коннекторов.`
+
+Визуал: cost card с тремя колонками: tokens, time, resources. Слева browser automation, справа WebMCP. Переход: экономия не означает, что WebMCP заменяет MCP.
+
+Что говорить: WebMCP требует работы разработчика сайта один раз, зато сокращает повторяющиеся расходы каждого запуска. Агент получает компактный контракт вместо длинных наблюдений, пользователь ждёт меньше, а команде не нужно поддерживать отдельный connector для каждого клиента и сайта. Это направление экономии, а не универсальный процент.
 
 Источник: [WebMCP proposal benefits](https://webmachinelearning.github.io/webmcp/docs/proposal.html)
 
@@ -870,25 +874,25 @@ RU: `Один релиз может содержать страницу, UI и �
 
 ### 68. The agent receives less context
 
-EN: `A business tool contract is smaller than repeated page observations.`
+EN: `One business schema can replace repeated page observations.`
 
-RU: `Контракт бизнес-инструмента компактнее повторных наблюдений страницы.`
+RU: `Одна бизнес-схема может заменить повторные наблюдения страницы.`
 
-Визуал: маленькая schema рядом с длинным accessibility tree. Переход: меньше наблюдений обычно означает меньше модельных шагов.
+Визуал: маленькая schema рядом с длинным accessibility tree, под ними три счётчика: tokens down, time down, retries down. Переход: меньше наблюдений обычно означает меньше модельных шагов.
 
-Что говорить: Вместо полного дерева страницы агент получает несколько действий и их параметры. Это потенциально оставляет больше контекста для самой задачи.
+Что говорить: В browser automation модель снова и снова получает состояние интерфейса. WebMCP даёт смысловое действие и его параметры сразу. Значит, потенциально уменьшается контекст, время ожидания и число повторов, но точный эффект нужно измерять на конкретной задаче.
 
 Источник: [Playwright snapshots](https://github.com/microsoft/playwright.dev/blob/main/mcp/snapshots.mdx), [Lighthouse tool warning](https://developer.chrome.com/docs/lighthouse/agentic-browsing/registered-webmcp-tools)
 
 ### 69. The workflow needs fewer model turns
 
-EN: `Explicit actions reduce observation, retries, and verification loops.`
+EN: `Fewer observations can mean fewer model turns and less waiting.`
 
-RU: `Явные действия сокращают наблюдение, повторы и циклы проверки.`
+RU: `Меньше наблюдений может означать меньше model turns и меньше ожидания.`
 
-Визуал: пять серых model turns превращаются в два цветных. Не показывать выдуманные числа стоимости. Переход: это меняет роль сайта в агентском сценарии.
+Визуал: серый цикл из snapshot, action, snapshot, retry превращается в короткий цветной tool call. Рядом три подписи: tokens, time, compute. Не показывать выдуманные числа стоимости. Переход: это меняет роль сайта в агентском сценарии.
 
-Что говорить: Меньше шагов обычно означает меньшую задержку и потенциально меньшую стоимость. Универсальные проценты обещать нельзя, результат зависит от сайта, модели и задачи.
+Что говорить: Явный инструмент не делает задачу автоматически дешёвой, но убирает часть реконструкции интерфейса. Поэтому возможны меньше модельных ходов, ниже задержка и меньше вычислительных повторов. Универсальные проценты обещать нельзя, результат зависит от сайта, модели и задачи.
 
 Источник: [OpenAI WebMCP Challenge](https://openai.com/webmcp-challenge/), [Playwright workflow](https://github.com/microsoft/playwright.dev/blob/main/mcp/installation.mdx)
 
