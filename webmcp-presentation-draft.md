@@ -671,27 +671,29 @@ RU: `MCP для постоянных сервисов. WebMCP для актив�
 
 Источник: [WebMCP and MCP comparison](https://developer.chrome.com/docs/ai/webmcp/compare-mcp)
 
-## Part 5. One running example: booking a doctor
+## Part 5. One running example: the official booking demo
 
 ### 46. Why this booking flow?
 
-EN: `One running example lets us compare all three approaches.`
+EN: `The same booking widget, two ways to be controlled.`
 
-EN: `Book a dermatologist after 19:00, then let the person confirm.`
+EN: `Request: "Book me Tuesday at 2pm."`
 
-RU: `Один сквозной пример позволяет сравнить все три подхода.`
+RU: `Один и тот же booking widget, два способа управления.`
 
-RU: `Найти дерматолога после 19:00 и оставить подтверждение человеку.`
+RU: `Запрос: «Запиши меня во вторник на 14:00».`
 
-Визуал: короткий flow: request -> find doctor -> choose slot -> prepare -> human confirms. Под ним одна реплика пользователя. Переход: сначала сравним путь без WebMCP.
+Визуал: две одинаковые booking формы рядом. Слева Agent scrapes, справа Agent calls tools. Под ними одна реплика пользователя. Переход: сначала посмотрим левую сторону.
 
-Что говорить: Booking flow - не отдельный продуктовый кейс и не выдуманный API для самоцели. Это один сквозной пример, на котором сравниваем три подхода к одной и той же задаче: browser automation, отдельный MCP server и WebMCP. Здесь есть состояние вкладки, поиск, выбор слота и значимое финальное подтверждение, поэтому разница между подходами видна сразу.
+Что говорить: Это не выдуманный flow клиники. Это официальный WebMCP explainer demo, который мы покажем вживую в конце. Он специально ставит рядом один booking widget без WebMCP и с WebMCP, поэтому разница между scraping и tool calling видна на одной и той же задаче.
+
+Источник: [Official WebMCP explainer demo](https://googlechromelabs.github.io/webmcp-tools/demos/explainer/)
 
 ### 47. Two ways to expose the booking flow
 
-EN: `Imperative JavaScript for app logic. Declarative HTML for existing forms.`
+EN: `Imperative tools read availability. A declarative form books a slot.`
 
-RU: `Imperative JavaScript для логики приложения. Declarative HTML для существующих форм.`
+RU: `Imperative tools читают доступность. Declarative form бронирует слот.`
 
 Визуал: только два code block рядом: imperative JavaScript и declarative HTML form. Без картинок, иконок и схем. Переход: попробуем это локально.
 
@@ -699,108 +701,110 @@ RU: `Imperative JavaScript для логики приложения. Declarative
 
 ```js
 await document.modelContext.registerTool({
-  name: 'findDoctors',
-  description: 'Find doctors',
-  inputSchema: doctorSchema,
-  execute: findDoctors,
+  name: 'getAvailability',
+  description: 'List bookable consultation times.',
+  inputSchema: availabilitySchema,
+  execute: ({ startDate, endDate }) => calendar.slotsBetween(startDate, endDate),
 });
 ```
 
 Код для вставки в презу - declarative API:
 
 ```html
-<form toolname="checkAvailability"
-      tooldescription="Check appointment availability">
-  <input name="doctorId" required>
-  <button type="submit">Check</button>
+<form toolname="bookSlot"
+      tooldescription="Reserve a 30-minute consultation"
+      toolautosubmit>
+  <input type="date" name="date" required>
+  <input type="time" name="time" required>
+  <button type="submit">Book</button>
 </form>
 ```
 
-Что говорить: На этом booking flow видно два способа объявить tools. Imperative API вызывает продуктовую логику, например поиск врачей. Declarative API превращает существующую форму в tool и сохраняет финальное подтверждение за человеком. Дальше сравним, что происходит с этим же flow без WebMCP.
+Что говорить: В этом demo availability объявлена через imperative API, а booking form можно объявить через declarative API. Это не два конкурирующих протокола, а два способа дать странице tools. Дальше сравним, что происходит с тем же widget без WebMCP.
 
 Источник: [Imperative API](https://developer.chrome.com/docs/ai/webmcp/imperative-api), [Declarative API](https://developer.chrome.com/docs/ai/webmcp/declarative-api)
 
 ### 48. Without WebMCP
 
-EN: `The agent must understand the page before it can help.`
+EN: `The agent scrapes DOM nodes to infer how this booking widget works.`
 
-RU: `Агент должен понять страницу, прежде чем сможет помочь.`
+RU: `Агент разбирает DOM-узлы, чтобы понять booking widget.`
 
-Визуал: длинная плёнка из snapshots, кликов и проверок. Переход: с WebMCP задача превращается в несколько продуктовых действий.
+Визуал: лог official demo: aria, classnames, форма, клики, проверки. Подпись: 40+ DOM nodes to parse. Переход: справа этот же widget даёт agent готовые tools.
 
-Что говорить: Сначала агент получает snapshot или screenshot, находит фильтры, заполняет поля, открывает карточки и проверяет состояние после каждого шага.
+Что говорить: В левой части demo агент угадывает смысл из aria-атрибутов, classnames и формы страницы. Даже для простого бронирования он сначала читает и реконструирует интерфейс, а затем проверяет результат.
 
 ### 49. With WebMCP
 
-EN: `The page exposes the actions needed for the booking workflow.`
+EN: `The page exposes typed tools. The agent calls them directly.`
 
-RU: `Страница предоставляет действия, необходимые для записи.`
+RU: `Страница предоставляет typed tools. Агент вызывает их напрямую.`
 
 Визуал: только три строки вызовов tools в code block, раскрывать по одной. Без карточек, картинок и схем. Переход: первый инструмент ищет врачей.
 
 Код для вставки в презу:
 
 ```js
-findDoctors({ specialty: 'dermatology', afterTime: '19:00' });
-getAvailableSlots({ doctorId, dateRange: 'next 7 days' });
-prepareAppointment({ doctorId, slotId, patient });
+getAvailability({ startDate: '2026-05-19', endDate: '2026-05-19' });
+bookSlot({ date: '2026-05-19', time: '14:00', name, email });
 ```
 
-Что говорить: Сайт описывает тот же пользовательский сценарий через несколько осмысленных инструментов. Они составляют одну задачу, а не набор несвязанных демо.
+Что говорить: В правой части demo агент видит контракт tools и передаёт структурированные аргументы. Ему не нужно искать нужную кнопку. Этот же flow становится короче, прозрачнее и проще для проверки.
 
-### 50. Find doctors
+### 50. Read availability
 
-EN: `findDoctors({ specialty, afterTime, location })`
+EN: `getAvailability({ startDate, endDate })`
 
-RU: `findDoctors({ specialty, afterTime, location })`
+RU: `getAvailability({ startDate, endDate })`
 
-Визуал: только code block поиска врачей. Без картинок, иконок и схем. Переход: затем агент запрашивает слоты конкретного врача.
+Визуал: только code block доступных слотов. Без картинок, иконок и схем. Переход: агент передаёт выбранные дату и время в booking tool.
 
 Код для вставки в презу:
 
 ```js
-const findDoctors = ({ specialty, afterTime, location }) =>
-  api.doctors.search({ specialty, afterTime, location });
+const getAvailability = ({ startDate, endDate }) =>
+  calendar.slotsBetween(startDate, endDate);
 ```
 
-Что говорить: Первый инструмент принимает смысловые параметры запроса. Агент получает подходящих врачей без чтения каждой карточки на странице.
+Что говорить: Первый imperative tool возвращает bookable consultation times в заданном диапазоне дат. Агент получает структурированный список слотов, а не пытается прочитать и понять календарь.
 
-### 51. Read available slots
+### 51. Book the selected slot
 
-EN: `getAvailableSlots({ doctorId, dateRange })`
+EN: `bookSlot({ date, time, name, email })`
 
-RU: `getAvailableSlots({ doctorId, dateRange })`
+RU: `bookSlot({ date, time, name, email })`
 
-Визуал: только code block свободных слотов. Без картинок, иконок и схем. Переход: выбранный слот передаётся в подготовку записи.
+Визуал: только code block вызова `bookSlot`. Без картинок, иконок и схем. Переход: tool передаёт данные в логику бронирования.
 
 Код для вставки в презу:
 
 ```js
-const getAvailableSlots = ({ doctorId, dateRange }) =>
-  api.slots.list({ doctorId, dateRange });
+bookSlot({
+  date: '2026-05-19', time: '14:00',
+  name: 'Sarah Drasner', email: 'sarah@example.com',
+});
 ```
 
-Что говорить: Второй инструмент возвращает структурированные свободные слоты. Календарь остаётся удобным интерфейсом для человека, но перестаёт быть препятствием для агента.
+Что говорить: Второй tool получает готовые структурированные данные и создаёт booking. В official demo этот же capability можно объявить как declarative HTML form.
 
-### 52. Prepare the appointment
+### 52. The booking tool calls product logic
 
-EN: `prepareAppointment({ doctorId, slotId, patient })`
+EN: `bookSlot validates data before creating the reservation.`
 
-RU: `prepareAppointment({ doctorId, slotId, patient })`
+RU: `bookSlot проверяет данные перед созданием бронирования.`
 
-Визуал: только code block подготовки записи. Без картинок, иконок и схем. Переход: сайт всё равно обязан проверить действие.
+Визуал: только code block `bookSlot`. Без картинок, иконок и схем. Переход: сайт всё равно обязан проверить действие.
 
 Код для вставки в презу:
 
 ```js
-async function prepareAppointment(input) {
-  const appointment = await api.appointments.prepare(input);
-  renderConfirmation(appointment);
-  return { status: 'prepared', appointment };
+async function bookSlot(input) {
+  validateBooking(input);
+  return api.book(input);
 }
 ```
 
-Что говорить: Третий инструмент заполняет данные и подготавливает запись. Он не завершает значимое действие без участия человека.
+Что говорить: Tool вызывает существующую продуктовую функцию. WebMCP не обходит правила продукта: валидация, доступность и любые подтверждения остаются внутри приложения.
 
 ### 53. The application validates the action
 
@@ -822,13 +826,13 @@ validatePatient(input.patient);
 
 ### 54. The page shows the prepared result
 
-EN: `The selected doctor and slot appear in the normal interface.`
+EN: `The booked slot appears in the normal interface.`
 
-RU: `Выбранные врач и время появляются в обычном интерфейсе.`
+RU: `Забронированный слот появляется в обычном интерфейсе.`
 
 Визуал: заполненная карточка записи с врачом и временем. Переход: финальное решение остаётся у человека.
 
-Что говорить: Человек видит результат работы агента на той же странице. Он может проверить или изменить выбор до подтверждения.
+Что говорить: Человек видит результат работы агента на той же странице. Он может проверить состояние booking widget и результат вызова tool.
 
 ### 55. The person confirms
 
@@ -1114,15 +1118,15 @@ RU: `chrome://flags/#enable-webmcp-testing`
 
 Источник: [Chrome WebMCP local testing](https://developer.chrome.com/docs/ai/webmcp/)
 
-### 79. Open the official booking demo
+### 79. Run the official booking demo live
 
-EN: `Inspect the tools before changing your own product.`
+EN: `Run agent: "Book me Tuesday at 2pm."`
 
-RU: `Сначала изучите инструменты официального демо.`
+RU: `Запустите агента: «Запиши меня во вторник на 14:00».`
 
-Визуал: QR официального booking demo и его screenshot. Переход: следующий шаг - открыть DevTools.
+Визуал: живое демо, не screenshot. Нажать Run agent и показать две стороны booking widget: scrape DOM и call tools. Переход: затем открыть DevTools и проверить контракт.
 
-Что говорить: В официальном демо виден полный цикл регистрации, обнаружения, вызова и изменения интерфейса. Это быстрый способ понять модель руками.
+Что говорить: Это тот же demo, на котором построен Part 5. Слева агент разбирает интерфейс, справа вызывает typed tools напрямую. Вживую разница понятнее любой схемы: одна и та же задача, один и тот же widget, разный контракт.
 
 Источник: [Official booking demo](https://googlechromelabs.github.io/webmcp-tools/demos/explainer/)
 
