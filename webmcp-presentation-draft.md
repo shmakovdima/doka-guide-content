@@ -513,6 +513,19 @@ RU: `Имя. Описание. Схема входных данных. Функ�
 
 Визуал: короткий фрагмент `registerTool` размером не больше восьми строк. Переход: дальше браузер становится посредником.
 
+Код для вставки в презу:
+
+```js
+await document.modelContext.registerTool({
+  name: 'findDoctors',
+  description: 'Find doctors by specialty and time.',
+  inputSchema: { type: 'object', properties: {
+    specialty: { type: 'string' }, afterTime: { type: 'string' },
+  }, required: ['specialty'] },
+  execute: async ({ specialty, afterTime }) => findDoctors({ specialty, afterTime }),
+});
+```
+
 Что говорить: Разработчик явно указывает назначение действия и допустимые параметры. Вместо поиска подходящей кнопки агент выбирает функцию по её смыслу.
 
 Источник: [WebMCP imperative API](https://developer.chrome.com/docs/ai/webmcp/imperative-api)
@@ -698,6 +711,14 @@ EN: `The page exposes the actions needed for the booking workflow.`
 RU: `Страница предоставляет действия, необходимые для записи.`
 
 Визуал: три последовательные карточки tools, раскрывать по одной. Переход: первый инструмент ищет врачей.
+
+Код для вставки в презу:
+
+```js
+findDoctors({ specialty: 'dermatology', afterTime: '19:00' });
+getAvailableSlots({ doctorId, dateRange: 'next 7 days' });
+prepareAppointment({ doctorId, slotId, patient });
+```
 
 Что говорить: Сайт описывает тот же пользовательский сценарий через несколько осмысленных инструментов. Они составляют одну задачу, а не набор несвязанных демо.
 
@@ -1031,6 +1052,16 @@ RU: `Регистрация через JavaScript или аннотирован�
 
 Визуал: слева JavaScript imperative API, справа annotated HTML form. Переход: попробуем это локально.
 
+Код для вставки в презу - declarative API:
+
+```html
+<form toolname="checkAvailability"
+      tooldescription="Check appointment availability">
+  <input name="doctorId" required>
+  <button type="submit">Check</button>
+</form>
+```
+
 Что говорить: Императивный API подходит для действий приложения. Декларативный подход позволяет начать с существующей формы и сохранить участие человека.
 
 Источник: [Imperative API](https://developer.chrome.com/docs/ai/webmcp/imperative-api), [Declarative API](https://developer.chrome.com/docs/ai/webmcp/declarative-api)
@@ -1078,6 +1109,20 @@ EN: `Start with search, filtering, preview, or availability.`
 RU: `Начните с поиска, фильтрации, предпросмотра или доступности.`
 
 Визуал: одна read-only карточка `checkAvailability`. Переход: заканчиваем конкретным обещанием аудитории.
+
+Код для вставки в презу:
+
+```js
+await document.modelContext.registerTool({
+  name: 'checkAvailability',
+  description: 'Check available appointment slots.',
+  inputSchema: { type: 'object', properties: {
+    doctorId: { type: 'string' }, date: { type: 'string' },
+  } },
+  execute: async ({ doctorId, date }) => getSlots({ doctorId, date }),
+  annotations: { readOnlyHint: true },
+});
+```
 
 Что говорить: Не начинаем с покупки или удаления. Один read-only инструмент даст команде опыт и не создаст высокий риск для пользователя.
 
