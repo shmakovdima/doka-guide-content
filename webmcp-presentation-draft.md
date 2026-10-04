@@ -709,8 +709,6 @@ RU: `Booking widget предоставляет три typed tools.`
 
 Визуал: только один code block с тремя вызовами `document.modelContext.registerTool(...)`. Без карточек, картинок и схем. Переход: сначала смотрим доступное время.
 
-Источник кода: [Official WebMCP explainer demo](https://googlechromelabs.github.io/webmcp-tools/demos/explainer/)
-
 Код для вставки в презу:
 
 ```js
@@ -882,6 +880,8 @@ RU: `Агент выполняет рутину. Человек принимае
 Визуал: палец над кнопкой Confirm. Ритм: короткая пауза перед нажатием. Переход: теперь отделим пользу для человека от пользы для команды.
 
 Что говорить: Это полезная человеческая модель WebMCP. Агент сокращает путь, но человек сохраняет контроль над действием, которое влияет на его жизнь.
+
+LIVE BOOKING DEMO: https://googlechromelabs.github.io/webmcp-tools/demos/explainer/
 
 ## Part 6. Why people and teams should care
 
