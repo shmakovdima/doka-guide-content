@@ -657,13 +657,15 @@ await document.modelContext.registerTool({
   name: 'getAvailability',
   description: 'List bookable consultation times.',
   inputSchema: availabilitySchema,
-  execute: ({ startDate, endDate }) => ({
-    slots: calendar.slotsBetween(startDate, endDate),
-  }),
+  execute: ({ startDate, endDate }) => Object.fromEntries(
+    Object.entries(AVAILABILITY).filter(([date]) =>
+      date >= startDate && date <= endDate
+    )
+  ),
 });
 ```
 
-Результат вызова: `{"slots":[{"date":"2026-05-19","time":"09:00","durationMinutes":30},{"date":"2026-05-19","time":"14:00","durationMinutes":30},{"date":"2026-05-19","time":"16:30","durationMinutes":30}]}`
+Пример результата: `{"2026-10-06":["09:00","10:00","14:00","15:00","16:00"]}`
 
 Код для вставки в презу - declarative API:
 
@@ -671,13 +673,15 @@ await document.modelContext.registerTool({
 <form toolname="bookSlot"
       tooldescription="Reserve a 30-minute consultation"
       toolautosubmit>
-  <input type="date" name="date" required>
-  <input type="time" name="time" required>
+  <input type="date" name="date" toolparamdescription="Date of the booking" required>
+  <input type="time" name="time" toolparamdescription="Start time (24h)" required>
+  <input name="name" toolparamdescription="Full name" required>
+  <input type="email" name="email" toolparamdescription="Confirmation email" required>
   <button type="submit">Book</button>
 </form>
 ```
 
-Что говорить: Представьте, что мы объясняем действие браузеру. Imperative API - это "я сам пишу функцию, которую должен вызвать агент". Разработчик вручную описывает параметры, пишет JavaScript и решает, что сделать внутри функции. Поэтому `getAvailability` объявлен imperative: он вычисляет диапазон дат, обращается к календарю и возвращает объект со списком слотов. Это вариант для динамической логики, нескольких запросов, навигации и сложных правил.
+Что говорить: Представьте, что мы объясняем действие браузеру. Imperative API - это "я сам пишу функцию, которую должен вызвать агент". Разработчик вручную описывает параметры, пишет JavaScript и решает, что сделать внутри функции. Поэтому `getAvailability` объявлен imperative: он вычисляет диапазон дат, обращается к календарю и возвращает объект, где каждому дню соответствует список доступных времён. Это вариант для динамической логики, нескольких запросов, навигации и сложных правил.
 
 Declarative API - это "у меня уже есть хорошая HTML-форма, просто сделайте её tool". Разработчик добавляет атрибуты к форме, а браузер читает поля как схему параметров. Поэтому `bookSlot` можно сделать declarative: дата, время, имя и email уже существуют как обычные поля формы. Это быстрее, не дублирует UI и сохраняет форму видимой человеку, но подходит только для сценариев, которые естественно выражаются формой.
 
@@ -695,26 +699,28 @@ RU: `Агент разбирает DOM-узлы, чтобы понять booking
 
 Что говорить: В левой части demo агент угадывает смысл из aria-атрибутов, classnames и формы страницы. Даже для простого бронирования он сначала читает и реконструирует интерфейс, а затем проверяет результат.
 
-### 49. With WebMCP
+### 49. The official demo API: three tools
 
-EN: `The page exposes typed tools. The agent calls them directly.`
+EN: `The booking widget exposes three typed tools.`
 
-RU: `Страница предоставляет typed tools. Агент вызывает их напрямую.`
+RU: `Booking widget предоставляет три typed tools.`
 
-Визуал: только code block вызовов tools и их результатов, раскрывать по одной. Без карточек, картинок и схем. Переход: первый инструмент ищет врачей.
+Визуал: только один code block с тремя сигнатурами и краткими return contracts. Без карточек, картинок и схем. Переход: сначала смотрим доступное время.
 
 Код для вставки в презу:
 
 ```js
-const { slots } = await getAvailability({
-  startDate: '2026-05-19', endDate: '2026-05-19',
-}); // -> { slots: [09:00, 14:00, 16:30] }
+getAvailability({ startDate, endDate })
+// -> { 'YYYY-MM-DD': ['09:00', '10:00', '14:00', ...], ... }
 
-const booking = await bookSlot({ date: '2026-05-19', time: '14:00', name, email });
-// -> { bookingId: 'bk_123', status: 'confirmed' }
+bookSlot({ date, time, name, email })
+// -> { ok: true, confirmationId, date, time }
+
+cancelBooking({ confirmationId })
+// -> { ok: true, cancelled: confirmationId }
 ```
 
-Что говорить: В правой части demo агент видит контракт tools, передаёт структурированные аргументы и получает структурированный результат. Сначала `slots`, затем `bookingId` и статус. Ему не нужно искать нужную кнопку. Этот же flow становится короче, прозрачнее и проще для проверки.
+Что говорить: Это полный API официального demo, не придуманный набор для слайда. Сначала агент читает доступность по диапазону дат. Затем бронирует конкретный слот и получает `confirmationId`. Если нужно отменить запись, он передаёт этот идентификатор в третий tool. Дальше разберём каждый вызов, а не будем повторять этот список.
 
 ### 50. Read availability
 
@@ -727,17 +733,17 @@ RU: `getAvailability({ startDate, endDate })`
 Код для вставки в презу:
 
 ```js
-const getAvailability = ({ startDate, endDate }) =>
-  ({ slots: calendar.slotsBetween(startDate, endDate) });
+getAvailability({
+  startDate: '2026-10-06', endDate: '2026-10-07',
+});
 
-// -> { slots: [
-//      { date: '2026-05-19', time: '09:00', durationMinutes: 30 },
-//      { date: '2026-05-19', time: '14:00', durationMinutes: 30 },
-//      { date: '2026-05-19', time: '16:30', durationMinutes: 30 },
-//    ] }
+// -> {
+//   '2026-10-06': ['09:00', '10:00', '14:00', '15:00', '16:00'],
+//   '2026-10-07': ['09:00', '11:00', '14:00', '16:00'],
+// }
 ```
 
-Что говорить: Первый imperative tool возвращает объект с bookable consultation times в заданном диапазоне дат. Агент получает `slots` со временем и длительностью, а не пытается прочитать и понять календарь.
+Что говорить: Первый imperative tool возвращает не один слот и не массив карточек. Его контракт - объект: ключ это ISO-дата, значение это все доступные времена в этот день. Агент сразу видит варианты и выбирает один, не пытаясь прочитать календарь.
 
 ### 51. Book the selected slot
 
@@ -751,55 +757,55 @@ RU: `bookSlot({ date, time, name, email })`
 
 ```js
 const booking = await bookSlot({
-  date: '2026-05-19', time: '14:00',
+  date: '2026-10-06', time: '14:00',
   name: 'Sarah Drasner', email: 'sarah@example.com',
 });
 
-// 14:00 selected from [09:00, 14:00, 16:30]
-// -> { bookingId: 'bk_123', status: 'confirmed' }
+// 14:00 selected from the available times on 2026-10-06
+// -> { ok: true, confirmationId: 'BK-AB12CD', date: '2026-10-06', time: '14:00' }
 ```
 
-Что говорить: Второй tool получает готовые структурированные данные и создаёт booking. В ответ агент получает идентификатор созданной записи и её статус, например `confirmed`. В official demo этот же capability можно объявить как declarative HTML form.
+Что говорить: Второй tool получает выбранные дату и время, имя и email. При успехе demo возвращает `ok: true`, идентификатор подтверждения, дату и время. `confirmationId` нужен не для красоты: он становится входом в третий tool. В official demo этот же capability можно объявить как declarative HTML form.
 
-### 52. The booking tool calls product logic
+### 52. Cancel a booking
 
-EN: `bookSlot validates data before creating the reservation.`
+EN: `cancelBooking uses the confirmation id returned by bookSlot.`
 
-RU: `bookSlot проверяет данные перед созданием бронирования.`
+RU: `cancelBooking использует confirmation id, который вернул bookSlot.`
 
-Визуал: только code block `bookSlot`. Без картинок, иконок и схем. Переход: сайт всё равно обязан проверить действие.
+Визуал: только code block `cancelBooking`. Без картинок, иконок и схем. Переход: каждый mutating tool всё равно обязан сообщать об ошибке ясно.
 
 Код для вставки в презу:
 
 ```js
-async function bookSlot(input) {
-  validateBooking(input);
-  const booking = await api.book(input);
-  return { bookingId: booking.id, status: 'confirmed' };
+const cancelled = await cancelBooking({
+  confirmationId: 'BK-AB12CD',
+});
+
+// -> { ok: true, cancelled: 'BK-AB12CD' }
+```
+
+Что говорить: Третий официальный tool отменяет ранее созданную запись. Он не ищет кнопку Cancel в DOM, а получает ровно тот `confirmationId`, который вернул `bookSlot`. Так результаты одного tool становятся надёжными входными данными другого.
+
+### 53. The demo returns a clear error
+
+EN: `bookSlot returns either a confirmation or a readable error.`
+
+RU: `bookSlot возвращает либо подтверждение, либо понятную ошибку.`
+
+Визуал: только code block результата `bookSlot`. Без картинок, иконок и схем. Переход: после успеха сайт обновляет привычный UI.
+
+Код для вставки в презу:
+
+```js
+const c = widgetWith.state.confirmed;
+if (!c) {
+  return { ok: false, error: 'Slot unavailable or input invalid.' };
 }
+return { ok: true, confirmationId: c.id, date: c.date, time: c.time };
 ```
 
-Что говорить: Tool вызывает существующую продуктовую функцию и нормализует результат для агента: `bookingId` и `status`. WebMCP не обходит правила продукта: валидация, доступность и любые подтверждения остаются внутри приложения.
-
-### 53. The application validates the action
-
-EN: `The site checks availability, permissions, and patient data.`
-
-RU: `Сайт проверяет доступность, права и данные пациента.`
-
-Визуал: только code block валидации. Без картинок, иконок и схем. Переход: после проверки сайт обновляет привычный UI.
-
-Код для вставки в презу:
-
-```js
-if (!canBook(user, input.patientId))
-  return { error: 'FORBIDDEN' };
-if (!(await isSlotAvailable(input.slotId)))
-  return { error: 'SLOT_UNAVAILABLE' };
-validatePatient(input.patient);
-```
-
-Что говорить: Схема помогает сформировать запрос, но не заменяет безопасность. Приложение повторно проверяет входные данные и право пользователя выполнить операцию. При отказе tool возвращает понятный структурированный результат, например `FORBIDDEN` или `SLOT_UNAVAILABLE`, а не молча продолжает flow.
+Что говорить: Это ровно логика официального demo. Если widget не смог подтвердить запись, агент получает `ok: false` и текст ошибки. В реальном продукте к этому добавляются серверная валидация, авторизация и подтверждение значимых действий, но контракт ошибки должен оставаться таким же ясным.
 
 ### 54. The page shows the prepared result
 
@@ -809,7 +815,7 @@ RU: `Забронированный слот появляется в обычн�
 
 Визуал: заполненная карточка записи с врачом и временем. Переход: финальное решение остаётся у человека.
 
-Что говорить: Человек видит результат работы агента на той же странице. Он может проверить состояние booking widget и результат вызова tool.
+Что говорить: Человек видит результат работы агента на той же странице. Он может проверить состояние booking widget, дату, время и `confirmationId`, который вернул tool.
 
 ### 55. The person confirms
 
