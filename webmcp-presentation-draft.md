@@ -255,11 +255,15 @@ RU: `Аккаунт, местоположение, страховка и тек�
 
 ### 16. Two bad options without WebMCP
 
-EN: `Without WebMCP, the agent either operates the interface or uses a separate MCP server.`
+EN: `Option 1: reconstruct actions from DOM, snapshots, and pixels.`
 
-RU: `Без WebMCP агент либо управляет интерфейсом, либо использует отдельный MCP-сервер.`
+EN: `Option 2: build, install, and maintain a separate MCP server.`
 
-Визуал: развилка с двумя оранжевыми путями: слева DOM, snapshots, clicks; справа separate MCP server, install, OAuth. Переход: сначала пройдём левый путь - управление интерфейсом.
+RU: `Вариант 1: восстанавливать действия по DOM, snapshots и пикселям.`
+
+RU: `Вариант 2: создать, установить и сопровождать отдельный MCP-сервер.`
+
+Визуал: две одинаковые оранжевые карточки. Левая: DOM -> snapshot -> click -> retry. Правая: server -> install -> config -> OAuth. Переход: сначала пройдём левый путь - управление интерфейсом.
 
 Что говорить: Сайт создан для человека. Если он не объявил инструменты, у агента есть два пути. Первый - разбирать DOM, текст, формы и пиксели, чтобы управлять интерфейсом. Второй - команда сайта строит отдельный MCP-сервер, а пользователь устанавливает и настраивает его. Оба пути работают, но оба создают лишнюю стоимость.
 
@@ -285,11 +289,11 @@ RU: `Каждый шаг расходует контекст и может сл�
 
 Что говорить: Агент тратит модельные вызовы на распознавание интерфейса, ожидание и проверку. Редизайн, модальное окно или новое название кнопки могут нарушить сценарий.
 
-### 19. Playwright MCP makes any page operable
+### 19. Playwright MCP is one browser automation tool
 
-EN: `It exposes navigation, snapshots, clicks, typing, and screenshots as tools.`
+EN: `Playwright MCP is one way to operate any page through browser tools.`
 
-RU: `Он предоставляет навигацию, snapshots, клики, ввод и скриншоты как инструменты.`
+RU: `Playwright MCP - один из способов управлять любой страницей через browser tools.`
 
 Визуал: логотип Playwright рядом с коротким accessibility tree. Переход: разные инструменты наблюдают страницу по-разному.
 
@@ -391,9 +395,9 @@ RU: `Нет интеграции с сайтом. Больше токенов, m
 
 ### 28. Option two: build a separate MCP server
 
-EN: `The clinic can expose the same operations through a backend integration.`
+EN: `Build, deploy, and connect a separate MCP server for the site.`
 
-RU: `Клиника может открыть те же операции через отдельную backend-интеграцию.`
+RU: `Создать, развернуть и подключить отдельный MCP-сервер для сайта.`
 
 Визуал: отдельный MCP-сервер клиники рядом с backend. Переход: технически контракт становится хорошим.
 
