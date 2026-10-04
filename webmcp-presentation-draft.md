@@ -81,6 +81,10 @@ RU: `[Имя] / [компания или проект] / [контакт]`
 
 ## Part 1. MCP solves service integration
 
+EN: MCP gives AI clients one common way to use external tools and data. It replaces many custom integrations with one shared protocol.
+
+RU: MCP даёт AI-клиентам единый способ работать с внешними инструментами и данными. Он заменяет множество отдельных интеграций одним общим протоколом.
+
 ### 1. Who has used MCP?
 
 EN: `Who has already installed or used an MCP server?`
