@@ -65,7 +65,7 @@ This file is the working source of truth for the deck. It is not a documentation
 - Code: no more than eight readable lines. Hide imports and unrelated application code.
 - Sources: keep links in speaker notes. Show a short source label on screen only for experimental support and Lighthouse claims.
 - Humor: five deliberate jokes across the talk. Do not add a joke to every technical slide.
-- MoscowJS details: visible slide number on slides 1-88, title slide without a number, final slide with contact and QR.
+- MoscowJS details: visible slide number on slides 1-89, title slide without a number, final slide with contact and QR.
 
 ## Title slide - unnumbered
 
@@ -469,7 +469,19 @@ RU: `Открытая страница должна предоставлять �
 
 ## Part 4. WebMCP makes the page callable
 
-### 35. WebMCP
+### 35. Who is behind WebMCP?
+
+EN: WebMCP is a community proposal, not a finished product from one company.
+
+RU: WebMCP - общественное предложение, а не готовый продукт одной компании.
+
+Визуал: короткая timeline: Microsoft + Google contributors -> Web Machine Learning Community Group -> experimental browser implementations. Переход: это не закрытый vendor API, а работающий draft веб-платформы.
+
+Что говорить: WebMCP вырос из практической проблемы браузерных агентов и развивается как proposal в W3C Web Machine Learning Community Group. В первоначальном описании отмечены участники Microsoft и Google, а текущий draft редактируют Brandon Walderman, Khushal Sagar и Dominic Farolino. Поэтому корректно говорить: WebMCP развивают Microsoft, Google и сообщество Web Machine Learning, а не одна компания.
+
+Источник: [WebMCP repository and acknowledgments](https://github.com/webmachinelearning/webmcp), [WebMCP draft specification](https://github.com/webmachinelearning/webmcp/blob/main/index.bs)
+
+### 36. WebMCP
 
 EN: `WebMCP lets a page expose actions as structured tools.`
 
@@ -481,7 +493,7 @@ RU: `WebMCP позволяет странице предоставлять де�
 
 Источник: [WebMCP specification](https://webmachinelearning.github.io/webmcp/)
 
-### 36. A second interface for the same product
+### 37. A second interface for the same product
 
 EN: `People keep the visual UI. Agents receive tool contracts.`
 
@@ -493,7 +505,7 @@ RU: `Люди сохраняют визуальный UI. Агенты полу�
 
 Источник: [WebMCP non-goals](https://github.com/webmachinelearning/webmcp)
 
-### 37. No separate server is required
+### 38. No separate server is required
 
 EN: `The page registers tools from its own JavaScript or HTML.`
 
@@ -505,7 +517,7 @@ RU: `Страница регистрирует инструменты через
 
 Источник: [WebMCP proposal](https://webmachinelearning.github.io/webmcp/docs/proposal.html)
 
-### 38. The page defines the action
+### 39. The page defines the action
 
 EN: `Name. Description. Input schema. Execute function.`
 
@@ -530,7 +542,7 @@ await document.modelContext.registerTool({
 
 Источник: [WebMCP imperative API](https://developer.chrome.com/docs/ai/webmcp/imperative-api)
 
-### 39. The browser exposes registered tools
+### 40. The browser exposes registered tools
 
 EN: `The browser mediates discovery and invocation.`
 
@@ -542,7 +554,7 @@ RU: `Браузер управляет обнаружением и вызово�
 
 Источник: [WebMCP specification](https://webmachinelearning.github.io/webmcp/)
 
-### 40. The agent chooses a business action
+### 41. The agent chooses a business action
 
 EN: `The model selects "findDoctors" instead of searching the DOM.`
 
@@ -552,7 +564,7 @@ RU: `Модель выбирает "findDoctors" вместо поиска по 
 
 Что говорить: Агент сопоставляет цель пользователя с описанием инструмента. Ему не нужно сначала восстанавливать структуру карточек, фильтров и кнопок.
 
-### 41. The page executes its own logic
+### 42. The page executes its own logic
 
 EN: `The tool calls the application code that already knows the workflow.`
 
@@ -564,7 +576,7 @@ RU: `Инструмент вызывает код приложения, кото
 
 Источник: [WebMCP imperative API](https://developer.chrome.com/docs/ai/webmcp/imperative-api)
 
-### 42. The visible interface updates
+### 43. The visible interface updates
 
 EN: `The person sees the result on the same page.`
 
@@ -576,7 +588,7 @@ RU: `Человек видит результат на той же страни�
 
 Источник: [WebMCP proposal](https://webmachinelearning.github.io/webmcp/docs/proposal.html)
 
-### 43. The active session remains useful
+### 44. The active session remains useful
 
 EN: `The tool runs with the state available to the open page.`
 
@@ -588,7 +600,7 @@ RU: `Инструмент работает с состоянием, доступ
 
 Источник: [WebMCP and MCP comparison](https://developer.chrome.com/docs/ai/webmcp/compare-mcp)
 
-### 44. One product remains the source of truth
+### 45. One product remains the source of truth
 
 EN: `The UI and agent tool can share the same application functions.`
 
@@ -600,7 +612,7 @@ RU: `UI и инструмент агента могут использовать
 
 Источник: [WebMCP proposal benefits](https://webmachinelearning.github.io/webmcp/docs/proposal.html)
 
-### 45. The person keeps final control
+### 46. The person keeps final control
 
 EN: `The agent can prepare an action. The page can require confirmation.`
 
@@ -612,7 +624,7 @@ RU: `Агент может подготовить действие. Страни
 
 Источник: [WebMCP security guidance](https://developer.chrome.com/docs/agents/security)
 
-### 46. Cost checkpoint: WebMCP
+### 47. Cost checkpoint: WebMCP
 
 EN: `Small page integration. Less setup and less interface reconstruction.`
 
@@ -624,7 +636,7 @@ RU: `Небольшая интеграция в страницу. Меньше �
 
 Источник: [WebMCP proposal benefits](https://webmachinelearning.github.io/webmcp/docs/proposal.html)
 
-### 47. MCP and WebMCP solve different layers
+### 48. MCP and WebMCP solve different layers
 
 EN: `MCP serves persistent backend access. WebMCP serves the active website.`
 
@@ -634,7 +646,7 @@ RU: `MCP даёт постоянный доступ к backend. WebMCP рабо�
 
 Что говорить: WebMCP не отменяет MCP. Backend-интеграция полезна для фоновых задач и постоянного доступа, а WebMCP нужен для взаимодействия с сайтом, который сейчас открыт у человека.
 
-### 48. Where MCP wins
+### 49. Where MCP wins
 
 EN: `Persistent access. Background work. Cross-platform clients. Rich primitives.`
 
@@ -646,7 +658,7 @@ RU: `Постоянный доступ. Фоновые задачи. Разны�
 
 Источник: [MCP server primitives](https://modelcontextprotocol.io/specification/draft/server/index), [WebMCP and MCP comparison](https://developer.chrome.com/docs/ai/webmcp/compare-mcp)
 
-### 49. Where WebMCP wins
+### 50. Where WebMCP wins
 
 EN: `Active page state. Existing login. Visible collaboration. No site connector install.`
 
@@ -658,7 +670,7 @@ RU: `Состояние страницы. Текущий логин. Видим�
 
 Источник: [WebMCP and MCP comparison](https://developer.chrome.com/docs/ai/webmcp/compare-mcp)
 
-### 50. Where WebMCP loses
+### 51. Where WebMCP loses
 
 EN: `The page must be open. Support is limited. The API is experimental.`
 
@@ -670,7 +682,7 @@ RU: `Страница должна быть открыта. Поддержка �
 
 Источник: [WebMCP limitations](https://developer.chrome.com/docs/ai/webmcp/), [Implementation status](https://github.com/webmachinelearning/webmcp/blob/main/implementation-status.md)
 
-### 51. The strongest products can use both
+### 52. The strongest products can use both
 
 EN: `MCP for persistent services. WebMCP for the active customer journey.`
 
@@ -684,7 +696,7 @@ RU: `MCP для постоянных сервисов. WebMCP для актив�
 
 ## Part 5. One booking workflow
 
-### 52. The request
+### 53. The request
 
 EN: `Find a dermatologist after 19:00 and prepare the earliest appointment here.`
 
@@ -694,7 +706,7 @@ RU: `Найди здесь дерматолога после 19:00 и подго
 
 Что говорить: Возвращаемся к единственному примеру. Человек выбрал клинику и делегирует поиск, но сохраняет за собой финальное решение.
 
-### 53. Without WebMCP
+### 54. Without WebMCP
 
 EN: `The agent must understand the page before it can help.`
 
@@ -704,7 +716,7 @@ RU: `Агент должен понять страницу, прежде чем 
 
 Что говорить: Сначала агент получает snapshot или screenshot, находит фильтры, заполняет поля, открывает карточки и проверяет состояние после каждого шага.
 
-### 54. With WebMCP
+### 55. With WebMCP
 
 EN: `The page exposes the actions needed for the booking workflow.`
 
@@ -722,7 +734,7 @@ prepareAppointment({ doctorId, slotId, patient });
 
 Что говорить: Сайт описывает тот же пользовательский сценарий через несколько осмысленных инструментов. Они составляют одну задачу, а не набор несвязанных демо.
 
-### 55. Find doctors
+### 56. Find doctors
 
 EN: `findDoctors({ specialty, afterTime, location })`
 
@@ -732,7 +744,7 @@ RU: `findDoctors({ specialty, afterTime, location })`
 
 Что говорить: Первый инструмент принимает смысловые параметры запроса. Агент получает подходящих врачей без чтения каждой карточки на странице.
 
-### 56. Read available slots
+### 57. Read available slots
 
 EN: `getAvailableSlots({ doctorId, dateRange })`
 
@@ -742,7 +754,7 @@ RU: `getAvailableSlots({ doctorId, dateRange })`
 
 Что говорить: Второй инструмент возвращает структурированные свободные слоты. Календарь остаётся удобным интерфейсом для человека, но перестаёт быть препятствием для агента.
 
-### 57. Prepare the appointment
+### 58. Prepare the appointment
 
 EN: `prepareAppointment({ doctorId, slotId, patient })`
 
@@ -752,7 +764,7 @@ RU: `prepareAppointment({ doctorId, slotId, patient })`
 
 Что говорить: Третий инструмент заполняет данные и подготавливает запись. Он не завершает значимое действие без участия человека.
 
-### 58. The application validates the action
+### 59. The application validates the action
 
 EN: `The site checks availability, permissions, and patient data.`
 
@@ -762,7 +774,7 @@ RU: `Сайт проверяет доступность, права и данн�
 
 Что говорить: Схема помогает сформировать запрос, но не заменяет безопасность. Приложение повторно проверяет входные данные и право пользователя выполнить операцию.
 
-### 59. The page shows the prepared result
+### 60. The page shows the prepared result
 
 EN: `The selected doctor and slot appear in the normal interface.`
 
@@ -772,7 +784,7 @@ RU: `Выбранные врач и время появляются в обыч�
 
 Что говорить: Человек видит результат работы агента на той же странице. Он может проверить или изменить выбор до подтверждения.
 
-### 60. The person confirms
+### 61. The person confirms
 
 EN: `The agent handles the routine. The person makes the commitment.`
 
@@ -784,7 +796,7 @@ RU: `Агент выполняет рутину. Человек принимае
 
 ## Part 6. Why people and teams should care
 
-### 61. People delegate interface work
+### 62. People delegate interface work
 
 EN: `The person states the goal instead of operating every control.`
 
@@ -794,7 +806,7 @@ RU: `Человек формулирует цель вместо работы с
 
 Что говорить: Польза начинается с человека. Ему не нужно проходить одинаковые фильтры, формы и промежуточные экраны вручную.
 
-### 62. No connector for every website
+### 63. No connector for every website
 
 EN: `The page provides its tools when the person opens it.`
 
@@ -806,7 +818,7 @@ RU: `Страница предоставляет инструменты, ког�
 
 Источник: [WebMCP and MCP comparison](https://developer.chrome.com/docs/ai/webmcp/compare-mcp)
 
-### 63. No marketplace setup before use
+### 64. No marketplace setup before use
 
 EN: `Page actions do not require a separate local package or config entry.`
 
@@ -816,7 +828,7 @@ RU: `Действия страницы не требуют отдельного 
 
 Что говорить: Это уменьшает ручную настройку и количество решений о доверии. Для человека сайт остаётся обычным сайтом.
 
-### 64. The existing login remains useful
+### 65. The existing login remains useful
 
 EN: `The agent works with the session already active in the tab.`
 
@@ -828,7 +840,7 @@ RU: `Агент работает с сессией, которая уже акт
 
 Источник: [WebMCP proposal benefits](https://webmachinelearning.github.io/webmcp/docs/proposal.html)
 
-### 65. Developers reuse product logic
+### 66. Developers reuse product logic
 
 EN: `The tool can call the same function as the visible interface.`
 
@@ -840,7 +852,7 @@ RU: `Инструмент может вызывать ту же функцию, 
 
 Источник: [WebMCP proposal benefits](https://webmachinelearning.github.io/webmcp/docs/proposal.html)
 
-### 66. Updates ship with the website
+### 67. Updates ship with the website
 
 EN: `One release can contain the page, the UI, and its agent tools.`
 
@@ -852,7 +864,7 @@ RU: `Один релиз может содержать страницу, UI и �
 
 Источник: [WebMCP proposal](https://webmachinelearning.github.io/webmcp/docs/proposal.html)
 
-### 67. The agent receives less context
+### 68. The agent receives less context
 
 EN: `A business tool contract is smaller than repeated page observations.`
 
@@ -864,7 +876,7 @@ RU: `Контракт бизнес-инструмента компактнее �
 
 Источник: [Playwright snapshots](https://github.com/microsoft/playwright.dev/blob/main/mcp/snapshots.mdx), [Lighthouse tool warning](https://developer.chrome.com/docs/lighthouse/agentic-browsing/registered-webmcp-tools)
 
-### 68. The workflow needs fewer model turns
+### 69. The workflow needs fewer model turns
 
 EN: `Explicit actions reduce observation, retries, and verification loops.`
 
@@ -876,7 +888,7 @@ RU: `Явные действия сокращают наблюдение, пов
 
 Источник: [OpenAI WebMCP Challenge](https://openai.com/webmcp-challenge/), [Playwright workflow](https://github.com/microsoft/playwright.dev/blob/main/mcp/installation.mdx)
 
-### 69. The website becomes an action provider
+### 70. The website becomes an action provider
 
 EN: `Agents can use the site inside a larger user workflow.`
 
@@ -886,7 +898,7 @@ RU: `Агенты могут использовать сайт внутри бо
 
 Что говорить: Сайт конкурирует уже не только за просмотр страницы. Он может надёжно выполнить часть пользовательской задачи внутри агентского сценария.
 
-### 70. Security still belongs to the product
+### 71. Security still belongs to the product
 
 EN: `The site must validate inputs, permissions, and consequential actions.`
 
@@ -898,7 +910,7 @@ RU: `Сайт должен проверять данные, права и зна
 
 Источник: [WebMCP secure tools](https://developer.chrome.com/docs/ai/webmcp/secure-tools)
 
-### 71. Tool descriptions are untrusted input
+### 72. Tool descriptions are untrusted input
 
 EN: `A malicious page can hide instructions inside tool metadata or results.`
 
@@ -910,7 +922,7 @@ RU: `Вредоносная страница может спрятать инс�
 
 Источник: [Agent security considerations for WebMCP](https://developer.chrome.com/docs/agents/security)
 
-### 72. Browser context can contain sensitive data
+### 73. Browser context can contain sensitive data
 
 EN: `Tools must not silently combine data from unrelated origins.`
 
@@ -922,7 +934,7 @@ RU: `Инструменты не должны незаметно объедин�
 
 Источник: [WebMCP security and privacy](https://webmachinelearning.github.io/webmcp/#security-and-privacy-considerations)
 
-### 73. More tools can make the agent worse
+### 74. More tools can make the agent worse
 
 EN: `Lighthouse warns when a page registers more than 40 tools.`
 
@@ -936,7 +948,7 @@ RU: `Lighthouse предупреждает, если страница регис
 
 ## Part 7. Agentic SEO and current support
 
-### 74. Agentic browsing changes the SEO question
+### 75. Agentic browsing changes the SEO question
 
 EN: `A page must be findable and usable by an agent.`
 
@@ -948,7 +960,7 @@ RU: `Страница должна быть доступна для поиска
 
 Источник: [Chrome agent-ready toolkit](https://developer.chrome.com/blog/agent-ready-toolkit)
 
-### 75. WebMCP describes what a page can do
+### 76. WebMCP describes what a page can do
 
 EN: `The site exposes actions, not only content and links.`
 
@@ -960,7 +972,7 @@ RU: `Сайт предоставляет действия, а не только 
 
 Источник: [Chrome agent-friendly websites](https://developer.chrome.com/docs/ai/agents)
 
-### 76. Lighthouse has Agentic Browsing audits
+### 77. Lighthouse has Agentic Browsing audits
 
 EN: `Lighthouse evaluates signals that matter to browser agents.`
 
@@ -972,7 +984,7 @@ RU: `Lighthouse проверяет сигналы, важные для брау�
 
 Источник: [Lighthouse Agentic Browsing](https://developer.chrome.com/docs/lighthouse/agentic-browsing/)
 
-### 77. Lighthouse lists registered WebMCP tools
+### 78. Lighthouse lists registered WebMCP tools
 
 EN: `The audit detects imperative and declarative page tools.`
 
@@ -984,7 +996,7 @@ RU: `Аудит обнаруживает императивные и декла�
 
 Источник: [Registered WebMCP tools audit](https://developer.chrome.com/docs/lighthouse/agentic-browsing/registered-webmcp-tools)
 
-### 78. PageSpeed Insights shows the same direction
+### 79. PageSpeed Insights shows the same direction
 
 EN: `Agentic readiness is entering mainstream website diagnostics.`
 
@@ -996,7 +1008,7 @@ RU: `Готовность к агентам входит в привычную �
 
 Источник: [Lighthouse Agentic Browsing scoring](https://developer.chrome.com/docs/lighthouse/agentic-browsing/scoring), [PageSpeed Insights](https://pagespeed.web.dev/)
 
-### 79. WebMCP is not a confirmed ranking factor
+### 80. WebMCP is not a confirmed ranking factor
 
 EN: `Treat it as agent readiness, not a promise of higher Google rankings.`
 
@@ -1006,7 +1018,7 @@ RU: `Это готовность к агентам, а не обещание б�
 
 Что говорить: Не обещаем SEO-магии. Сегодня WebMCP означает, что сайт становится понятнее и полезнее для агентов. Публичного подтверждения влияния на ранжирование нет.
 
-### 80. WebMCP is still experimental
+### 81. WebMCP is still experimental
 
 EN: `The API and browser behavior may change.`
 
@@ -1018,7 +1030,7 @@ RU: `API и поведение браузеров могут изменитьс�
 
 Источник: [WebMCP specification status](https://webmachinelearning.github.io/webmcp/)
 
-### 81. Current browser tooling
+### 82. Current browser tooling
 
 EN: `Chrome provides flags, Origin Trial, DevTools, and Lighthouse support.`
 
@@ -1030,7 +1042,7 @@ RU: `Chrome предоставляет флаги, Origin Trial, DevTools и п�
 
 Источник: [WebMCP implementation status](https://github.com/webmachinelearning/webmcp/blob/main/implementation-status.md), [Chrome WebMCP](https://developer.chrome.com/docs/ai/webmcp/)
 
-### 82. Current agent support
+### 83. Current agent support
 
 EN: `Compatible agents can discover and invoke tools from the active page.`
 
@@ -1044,7 +1056,7 @@ RU: `Совместимые агенты могут находить и вызы
 
 ## Part 8. Try WebMCP today
 
-### 83. Two ways to expose a tool
+### 84. Two ways to expose a tool
 
 EN: `JavaScript registration or annotated HTML forms.`
 
@@ -1066,7 +1078,7 @@ RU: `Регистрация через JavaScript или аннотирован�
 
 Источник: [Imperative API](https://developer.chrome.com/docs/ai/webmcp/imperative-api), [Declarative API](https://developer.chrome.com/docs/ai/webmcp/declarative-api)
 
-### 84. Enable local testing
+### 85. Enable local testing
 
 EN: `chrome://flags/#enable-webmcp-testing`
 
@@ -1078,7 +1090,7 @@ RU: `chrome://flags/#enable-webmcp-testing`
 
 Источник: [Chrome WebMCP local testing](https://developer.chrome.com/docs/ai/webmcp/)
 
-### 85. Open the official booking demo
+### 86. Open the official booking demo
 
 EN: `Inspect the tools before changing your own product.`
 
@@ -1090,7 +1102,7 @@ RU: `Сначала изучите инструменты официальног
 
 Источник: [Official booking demo](https://googlechromelabs.github.io/webmcp-tools/demos/explainer/)
 
-### 86. Run a tool in DevTools
+### 87. Run a tool in DevTools
 
 EN: `Review the schema, invoke the tool, and inspect the result.`
 
@@ -1102,7 +1114,7 @@ RU: `Проверьте схему, вызовите инструмент и и�
 
 Источник: [WebMCP DevTools panel](https://developer.chrome.com/docs/devtools/application/webmcp)
 
-### 87. Add one safe action
+### 88. Add one safe action
 
 EN: `Start with search, filtering, preview, or availability.`
 
@@ -1126,7 +1138,7 @@ await document.modelContext.registerTool({
 
 Что говорить: Не начинаем с покупки или удаления. Один read-only инструмент даст команде опыт и не создаст высокий риск для пользователя.
 
-### 88. Questions
+### 89. Questions
 
 EN: `Try one WebMCP tool this week`
 
