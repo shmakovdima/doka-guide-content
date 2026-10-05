@@ -1061,6 +1061,8 @@ await modelContext.registerTool(tool);
 
 Что говорить: Это реальный breaking change, а не косметика. 27 мая 2026 спецификация перенесла `modelContext` с `Navigator` на `Document`, а Chrome 150 сделал `navigator.modelContext` deprecated alias. В новом коде пишем `document.modelContext`. Fallback нужен только на время миграции старых browser builds и polyfills.
 
+What to say: This is a real breaking change, not a cosmetic rename. On May 27, 2026, the spec moved `modelContext` from `Navigator` to `Document`, and Chrome 150 deprecated `navigator.modelContext`. New code should use `document.modelContext`. Keep the fallback only while supporting older browser builds or polyfills.
+
 Источник: [WebMCP PR #184 - move modelContext to Document](https://github.com/webmachinelearning/webmcp/pull/184), [Chrome Imperative API](https://developer.chrome.com/docs/ai/webmcp/imperative-api)
 
 ## Part 7. Agentic SEO and current support
