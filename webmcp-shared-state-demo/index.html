@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="An interactive WebMCP demo showing a payment race between a human and an AI agent inside one live page.">
+    <title>WebMCP Payment Race</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Interactive WebMCP architecture demo</p>
+          <h1>Two operators. One payment.</h1>
+          <p class="lede">Start an agent payment for $1,200, then correct the invoice to $120 before the processor responds. Compare no coordination with revision-aware reconciliation.</p>
+        </div>
+        <div class="api-badge" id="api-status" data-mode="loading">Detecting WebMCP API...</div>
+      </header>
+
+      <section class="control-bar" aria-label="Demo controls">
+        <fieldset class="segmented" id="mode-control">
+          <legend>Coordination model</legend>
+          <label>
+            <input type="radio" name="mode" value="unsafe" checked>
+            <span>Unsafe: no coordination</span>
+          </label>
+          <label>
+            <input type="radio" name="mode" value="coordinated">
+            <span>Coordinated: revision + reconciliation</span>
+          </label>
+        </fieldset>
+
+        <fieldset class="segmented scenario-control" id="scenario-control">
+          <legend>Scenario</legend>
+          <label>
+            <input type="radio" name="scenario" value="race" checked>
+            <span>Late response</span>
+          </label>
+          <label>
+            <input type="radio" name="scenario" value="abort">
+            <span>Abort after commit</span>
+          </label>
+        </fieldset>
+
+        <button class="button button-ghost" id="reset-button" type="button">Reset demo</button>
+      </section>
+
+      <p class="instruction" id="instruction">Start the agent, then correct the amount to $120 while the request is running.</p>
+
+      <section class="workspace" aria-label="Shared payment workspace">
+        <article class="panel human-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="panel-kicker">Operator 1</p>
+              <h2>Human UI</h2>
+            </div>
+            <span class="operator-mark human-mark" aria-hidden="true">H</span>
+          </div>
+
+          <div class="payment-card">
+            <p class="label">Invoice</p>
+            <div class="invoice-details">
+              <strong>Atlas Cloud</strong>
+              <span>#inv-2048</span>
+            </div>
+
+            <p class="label">Payment amount</p>
+            <div class="date-picker" role="group" aria-label="Payment amount">
+              <button class="amount-option" data-amount-cents="120000" type="button">
+                <span>Original</span>
+                <strong>$1,200</strong>
+              </button>
+              <button class="amount-option" data-amount-cents="12000" type="button">
+                <span>Corrected</span>
+                <strong>$120</strong>
+              </button>
+            </div>
+
+            <dl class="payment-summary">
+              <div>
+                <dt>Visible draft</dt>
+                <dd id="visible-draft">$1,200</dd>
+              </div>
+              <div>
+                <dt>Page revision</dt>
+                <dd id="page-revision">41</dd>
+              </div>
+            </dl>
+
+            <button class="button button-secondary" id="manual-pay-button" type="button">Pay manually</button>
+          </div>
+        </article>
+
+        <article class="panel state-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="panel-kicker">The boundary</p>
+              <h2>Shared state</h2>
+            </div>
+            <span class="status-chip" id="operation-status" data-status="idle">idle</span>
+          </div>
+
+          <div class="state-stack">
+            <section class="state-card">
+              <p class="label">Captured agent intent</p>
+              <pre id="captured-intent">No operation yet</pre>
+            </section>
+            <section class="state-card server-card">
+              <p class="label">Processor truth</p>
+              <pre id="server-state">No payment</pre>
+            </section>
+          </div>
+
+          <div class="countdown" id="countdown" hidden>
+            <span class="countdown-pulse" aria-hidden="true"></span>
+            <span id="countdown-copy">Processor response in 3.0s</span>
+          </div>
+
+          <section class="conflict-card" id="conflict-card" tabindex="-1" hidden>
+            <p class="conflict-kicker" id="conflict-kicker">Revision conflict</p>
+            <h3 id="conflict-title">The processor and page disagree</h3>
+            <p id="conflict-copy"></p>
+            <div class="conflict-actions" id="conflict-actions">
+              <button class="button button-primary" data-resolution="acknowledge" type="button">Acknowledge $1,200</button>
+              <button class="button button-danger" data-resolution="refund" type="button">Refund $1,200</button>
+              <button class="button button-ghost" data-resolution="continue" type="button">Continue with $120</button>
+            </div>
+          </section>
+
+          <button class="button button-primary" id="reconcile-button" type="button" hidden>Check payment status</button>
+        </article>
+
+        <article class="panel agent-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="panel-kicker">Operator 2</p>
+              <h2>Agent activity</h2>
+            </div>
+            <span class="operator-mark agent-mark" aria-hidden="true">A</span>
+          </div>
+
+          <section class="tool-card">
+            <div>
+              <p class="label">Registered WebMCP tool</p>
+              <code>payInvoice</code>
+            </div>
+            <span class="tool-hint">consequential</span>
+          </section>
+
+          <div class="agent-actions">
+            <button class="button button-primary" id="agent-button" type="button">Ask agent to pay</button>
+            <button class="button button-danger" id="stop-button" type="button" disabled>Stop</button>
+          </div>
+
+          <div class="timeline-wrap">
+            <div class="timeline-heading">
+              <p class="label">Event timeline</p>
+              <span id="event-count">1 event</span>
+            </div>
+            <ol class="timeline" id="timeline"></ol>
+          </div>
+        </article>
+      </section>
+
+      <footer class="footer-note">
+        <p>No LLM, payment provider, bank account, card data, or real funds are used. The native WebMCP tool and simulator share the same descriptor and execution function.</p>
+        <a href="https://developer.chrome.com/docs/ai/webmcp/imperative-api">Current WebMCP Imperative API</a>
+      </footer>
+
+      <div class="sr-only" id="live-region" aria-live="polite" aria-atomic="true"></div>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
