@@ -120,24 +120,6 @@ export function commitServerPayment(state) {
   const intent = state.capturedIntent;
   if (!intent) throw new Error('No captured intent to commit.');
 
-  if (state.mode === 'coordinated' && state.pageRevision !== intent.pageRevision) {
-    const conflict = {
-      type: 'stale-write-blocked',
-      capturedRevision: intent.pageRevision,
-      currentRevision: state.pageRevision,
-      capturedAmountCents: intent.amountCents,
-      currentAmountCents: state.draft.amountCents,
-    };
-
-    return event(
-      { ...state, conflict },
-      'server',
-      'stale-write-rejected',
-      'Revision check rejected the stale $1,200 intent before the processor was called.',
-      conflict,
-    );
-  }
-
   if (state.completedOperationIds.includes(intent.operationId)) {
     return event(
       state,
@@ -147,6 +129,8 @@ export function commitServerPayment(state) {
       { operationId: intent.operationId },
     );
   }
+
+  const revisionChanged = state.pageRevision !== intent.pageRevision;
 
   const serverPayment = {
     paymentId: 'pay-' + intent.operationId,
@@ -163,6 +147,24 @@ export function commitServerPayment(state) {
     completedOperationIds: [...state.completedOperationIds, intent.operationId],
   };
 
+  if (revisionChanged) {
+    const conflict = {
+      type: 'revision-conflict',
+      capturedRevision: intent.pageRevision,
+      currentRevision: state.pageRevision,
+      capturedAmountCents: intent.amountCents,
+      currentAmountCents: state.draft.amountCents,
+    };
+
+    return event(
+      { ...next, conflict },
+      'server',
+      'revision-conflict',
+      'Processor completed a ' + formatMoney(serverPayment.amountCents) + ' payment, but the page moved to a newer revision.',
+      conflict,
+    );
+  }
+
   return event(
     next,
     'server',
@@ -175,19 +177,6 @@ export function commitServerPayment(state) {
 export function receiveOperationResult(state) {
   if (!state.capturedIntent) {
     throw new Error('Cannot receive a result before an operation starts.');
-  }
-
-  if (state.conflict?.type === 'stale-write-blocked') {
-    return event(
-      {
-        ...state,
-        operationStatus: 'blocked',
-      },
-      'system',
-      'safe-result-applied',
-      'No payment was created. The $120 draft remains current.',
-      state.conflict,
-    );
   }
 
   if (!state.serverPayment) {
@@ -206,6 +195,17 @@ export function receiveOperationResult(state) {
       'system',
       'result-applied',
       'The payment result matches the current page revision.',
+    );
+  }
+
+  if (state.mode === 'coordinated') {
+    // The revision conflict was already registered when the processor committed.
+    // Confirm the late result without overwriting the corrected draft.
+    return event(
+      { ...state, operationStatus: 'completed' },
+      'system',
+      'late-result-reconciled',
+      'Late payment result arrived without coordinating with the corrected amount.',
     );
   }
 

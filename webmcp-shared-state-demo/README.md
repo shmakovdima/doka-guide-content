@@ -24,10 +24,15 @@ python3 -m http.server 4173 --directory webmcp-shared-state-demo
 
 Open `http://127.0.0.1:4173/`.
 
+Or, from inside this folder:
+
+```sh
+python3 -m http.server 4173
+```
+
 ## Run deterministic state tests
 
 ```sh
-cd webmcp-shared-state-demo
 node --test *.test.js
 ```
 
@@ -36,8 +41,7 @@ node --test *.test.js
 With the local server running:
 
 ```sh
-cd webmcp-shared-state-demo
-bunx playwright test
+npx playwright test
 ```
 
 The browser suite uses the installed Google Chrome channel. It verifies the unsafe mismatch, coordinated reconciliation, refund as a new operation, abort after commit, and mobile overflow.
@@ -52,7 +56,7 @@ The browser suite uses the installed Google Chrome channel. It verifies the unsa
 Regenerate the recording while the local server is running:
 
 ```sh
-bun run record
+node record-demo.mjs
 ```
 
 ## Native and simulator modes
@@ -71,15 +75,17 @@ WebMCP API unavailable: deterministic simulator
 
 The fallback is intentional. Readers can reproduce the race without an experimental browser setup.
 
-## Move to a standalone repository
+## Publish to GitHub Pages
 
-This directory has no imports from the parent repository and uses only relative paths. To publish it separately:
+This directory has no imports from the parent repository and uses only relative paths, so it can be published as a standalone site.
 
-1. Copy the directory contents to the root of a new repository.
-2. Enable GitHub Pages for the default branch.
-3. Confirm that the Pages URL loads `index.html` and all relative assets.
-4. Replace `DEMO_URL` in the article files with the published URL.
-5. Record the hosted build for the final article.
+1. Copy the directory contents to the root of a new repository (or keep it here and enable Pages on a `/webmcp-shared-state-demo` path).
+2. `git add` the static files: `index.html`, `app.js`, `state.js`, `webmcp.js`, `styles.css`, and the `assets/` files.
+3. Do **not** commit `node_modules/`, `test-results/`, `assets/raw/`, or `.DS_Store`.
+4. Enable GitHub Pages for the default branch.
+5. Confirm that the Pages URL loads `index.html` and all relative assets.
+6. Replace `DEMO_URL` in the article files with the published URL.
+7. Record the hosted build for the final article.
 
 ## Files
 
@@ -90,3 +96,4 @@ This directory has no imports from the parent repository and uses only relative 
 - `app.js` connects UI events, fake processor timing, and reconciliation.
 - `state.test.js` and `webmcp.test.js` verify deterministic logic.
 - `browser.spec.js` verifies complete user flows.
+- `record-demo.mjs` records the Playwright video used in the article.

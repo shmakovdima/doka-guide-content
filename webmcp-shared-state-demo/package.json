@@ -1,11 +1,28 @@
 {
+  "name": "webmcp-shared-state-demo",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
+  "description": "Interactive WebMCP demo showing a payment race between a human and an AI agent inside one live page.",
   "scripts": {
     "test": "node --test *.test.js",
-    "test:browser": "playwright test",
+    "test:browser": "npx playwright test",
     "record": "node record-demo.mjs"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shmakovdima/doka-guide-content.git"
+  },
+  "homepage": "https://github.com/shmakovdima/doka-guide-content#readme",
+  "keywords": [
+    "webmcp",
+    "model-context-protocol",
+    "shared-state",
+    "demo",
+    "payment-race"
+  ],
+  "author": "Dmitrii Shmakov <contact@shmakovdima.ru>",
+  "license": "MIT",
   "devDependencies": {
     "@playwright/test": "^1.63.0"
   }
