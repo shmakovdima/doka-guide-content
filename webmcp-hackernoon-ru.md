@@ -14,7 +14,7 @@ tags:
   - software-architecture
   - user-experience
 cover_alt: "Человек исправляет счет до $120, пока AI-агент завершает старый платеж на $1,200, создавая конфликт между состоянием страницы и процессора."
-demo_url: "https://shmakovdima.github.io/webmcp-browser-benchmark/"
+demo_url: "https://shmakovdima.github.io/webmcp-shared-state-demo/"
 ---
 
 # WebMCP добавляет вашему сайту второго оператора. Кто владеет состоянием?
@@ -101,11 +101,26 @@ Backend должен понимать, что два запроса относя
 
 ## Посмотрите, как ломается правда
 
-![A user corrects an invoice to $120 while a WebMCP tool completes the earlier $1,200 payment](webmcp-shared-state-demo/assets/webmcp-shared-state-demo.gif)
+![A user corrects an invoice to $120 while a WebMCP tool completes the earlier $1,200 payment](https://shmakovdima.github.io/webmcp-shared-state-demo/assets/webmcp-shared-state-demo.gif)
 
 Синтетическое демо не отправляет деньги и не подключается к платежному провайдеру. Оно показывает ровно один interleaving: `payInvoice` фиксирует $1,200, человек меняет draft на $120, затем fake processor завершает старый платеж.
 
-> [Открыть интерактивное WebMCP-демо](https://shmakovdima.github.io/webmcp-browser-benchmark/): измените сумму во время выполнения `payInvoice` и сравните отсутствие координации с revision-aware reconciliation.
+> [Открыть интерактивное WebMCP-демо](https://shmakovdima.github.io/webmcp-shared-state-demo/): измените сумму во время выполнения `payInvoice` и сравните отсутствие координации с revision-aware reconciliation.
+
+Исходный код демо: https://github.com/shmakovdima/webmcp-shared-state-demo
+
+Запуск локально:
+
+```sh
+python3 -m http.server 4173 --directory webmcp-shared-state-demo
+# открыть http://127.0.0.1:4173/
+```
+
+Детерминированные тесты:
+
+```sh
+node --test *.test.js  # из папки webmcp-shared-state-demo
+```
 
 Timeline короткий:
 

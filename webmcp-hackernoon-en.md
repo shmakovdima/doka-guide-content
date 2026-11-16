@@ -14,7 +14,7 @@ tags:
   - software-architecture
   - user-experience
 cover_alt: "A human corrects an invoice to $120 while an AI agent completes the earlier $1,200 payment, creating a conflict between page state and processor truth."
-demo_url: "https://shmakovdima.github.io/webmcp-browser-benchmark/"
+demo_url: "https://shmakovdima.github.io/webmcp-shared-state-demo/"
 ---
 
 # WebMCP Gives Your Web App a Second Operator. Who Owns the State?
@@ -101,11 +101,26 @@ All four races point to the same missing fact: which version of human intent doe
 
 ## Watch the truth split
 
-![A user corrects an invoice to $120 while a WebMCP tool completes the earlier $1,200 payment](webmcp-shared-state-demo/assets/webmcp-shared-state-demo.gif)
+![A user corrects an invoice to $120 while a WebMCP tool completes the earlier $1,200 payment](https://shmakovdima.github.io/webmcp-shared-state-demo/assets/webmcp-shared-state-demo.gif)
 
 The demo is synthetic. It sends no money and talks to no payment provider. It shows one controlled interleaving: `payInvoice` captures $1,200, the person changes the draft to $120, and a fake processor completes the older payment.
 
-> [Try the interactive WebMCP payment-race demo](https://shmakovdima.github.io/webmcp-browser-benchmark/): change the amount while `payInvoice` is running, then compare an uncoordinated result with revision-aware reconciliation.
+> [Try the interactive WebMCP payment-race demo](https://shmakovdima.github.io/webmcp-shared-state-demo/): change the amount while `payInvoice` is running, then compare an uncoordinated result with revision-aware reconciliation.
+
+Demo source code: https://github.com/shmakovdima/webmcp-shared-state-demo
+
+Run locally:
+
+```sh
+python3 -m http.server 4173 --directory webmcp-shared-state-demo
+# open http://127.0.0.1:4173/
+```
+
+Deterministic tests:
+
+```sh
+node --test *.test.js  # from the webmcp-shared-state-demo folder
+```
 
 The timeline is short:
 
@@ -129,6 +144,7 @@ Capture an immutable intent before the first `await`:
 const intent = {
   operationId: crypto.randomUUID(),
   pageRevision: paymentStore.revision,
+  serverRevision: paymentStore.serverRevision,
   invoiceId: paymentStore.invoiceId,
   amountCents: paymentStore.amountCents,
   currency: paymentStore.currency,
