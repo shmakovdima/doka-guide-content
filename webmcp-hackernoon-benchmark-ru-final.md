@@ -86,7 +86,10 @@ export async function registerWebMcpTools(api) {
 
   const handlers = createWebMcpTools(api);
   for (const definition of getWebMcpToolDefinitions()) {
-    await modelContext.registerTool({ ...definition, execute: handlers[definition.name] });
+    await modelContext.registerTool({
+      ...definition,
+      execute: handlers[definition.name],
+    });
   }
 }
 ```
@@ -139,7 +142,7 @@ place_test_order   тестовый заказ, без оплаты
 
 ## Результаты
 
-Я прогнал бенчмарк четыре раза. Через API работал только Nemotron, и токены для него взяты из счета провайдера. Остальные три модели работали через свои CLI: GPT-5.6 Terra через Codex CLI, Claude Opus 5.5 через Claude Code, Meta Muse Spark 1.3 через Muse Code. Codex сам отдает расход токенов, поэтому для Terra я взял его отчет. У Claude и Muse такого отчета нет, поэтому я сохранил весь текст, который модель получила и отправила, и пересчитал его в токены. Все три интерфейса в каждом прогоне посчитаны одинаково. Складывать прогоны между собой нельзя, сравнивать интерфейсы внутри каждого можно.
+Я прогнал бенчмарк четыре раза, по одному на модель. Nemotron работал через API, и его токены взяты из счета провайдера. Terra работала через Codex CLI: Codex сам отдает расход токенов, и я взял эти числа как есть. Claude Opus 5.5 работал через Claude Code, Meta Muse Spark 1.3 через Muse Code. Ни один из них не отдает такой отчет, поэтому для них я считал иначе. Во время каждого прогона я записывал каждый вызов инструмента, аргументы и ответ браузера. Потом прогнал эти записи через токенизатор `o200k_base` и получил число токенов. Это оценка, а не счет провайдера: настоящий токенизатор Claude другой, так что абсолютные числа для Claude и Muse приблизительные. Все три интерфейса в каждом прогоне считались одним способом, поэтому сравнивать их внутри прогона можно. Числа разных прогонов между собой сравнивать нельзя.
 
 В каждом прогоне на каждой из пяти задач порядок одинаковый: дешевле всех WebMCP, потом Playwright MCP, потом DOM.
 
@@ -147,101 +150,101 @@ place_test_order   тестовый заказ, без оплаты
 
 Модель `nvidia/Nemotron-3-Ultra-550b-a55b` через Nebius Token Factory, токены из ответа провайдера. Здесь разница самая большая: на 94% меньше токенов, чем у Playwright MCP, и на 97% меньше, чем у DOM. Нагляднее всего задача T5 с изменением корзины. С WebMCP она заняла 14 499 токенов и 7 вызовов инструментов, с Playwright MCP 318 418 токенов и 22 вызова, с DOM 529 806 токенов и 46 вызовов.
 
-| Задача | Интерфейс | Total | Вызовы |
-| --- | --- | ---: | ---: |
-| T1 | WebMCP | 2 999 | 1 |
-| T1 | Playwright MCP | 25 340 | 5 |
-| T1 | DOM | 74 762 | 8 |
-| T2 | WebMCP | 5 220 | 3 |
-| T2 | Playwright MCP | 37 205 | 10 |
-| T2 | DOM | 77 911 | 10 |
-| T3 | WebMCP | 5 795 | 3 |
-| T3 | Playwright MCP | 71 285 | 12 |
-| T3 | DOM | 200 095 | 22 |
-| T4 | WebMCP | 2 846 | 1 |
-| T4 | Playwright MCP | 62 906 | 8 |
-| T4 | DOM | 122 971 | 11 |
-| T5 | WebMCP | 14 499 | 7 |
-| T5 | Playwright MCP | 318 418 | 22 |
-| T5 | DOM | 529 806 | 46 |
-| **T1-T5** | **WebMCP** | **31 359** | **15** |
-| **T1-T5** | **Playwright MCP** | **515 154** | **57** |
-| **T1-T5** | **DOM** | **1 005 545** | **97** |
+| Задача    | Интерфейс          |         Total | Вызовы |
+| --------- | ------------------ | ------------: | -----: |
+| T1        | WebMCP             |         2 999 |      1 |
+| T1        | Playwright MCP     |        25 340 |      5 |
+| T1        | DOM                |        74 762 |      8 |
+| T2        | WebMCP             |         5 220 |      3 |
+| T2        | Playwright MCP     |        37 205 |     10 |
+| T2        | DOM                |        77 911 |     10 |
+| T3        | WebMCP             |         5 795 |      3 |
+| T3        | Playwright MCP     |        71 285 |     12 |
+| T3        | DOM                |       200 095 |     22 |
+| T4        | WebMCP             |         2 846 |      1 |
+| T4        | Playwright MCP     |        62 906 |      8 |
+| T4        | DOM                |       122 971 |     11 |
+| T5        | WebMCP             |        14 499 |      7 |
+| T5        | Playwright MCP     |       318 418 |     22 |
+| T5        | DOM                |       529 806 |     46 |
+| **T1-T5** | **WebMCP**         |    **31 359** | **15** |
+| **T1-T5** | **Playwright MCP** |   **515 154** | **57** |
+| **T1-T5** | **DOM**            | **1 005 545** | **97** |
 
 ### GPT-5.6 Terra
 
 Terra работала через Codex CLI, и ее числа заметно больше, чем у остальных моделей. Codex на каждом запросе к модели заново отправляет свои системные инструкции, описания инструментов и всю историю сессии. Отфильтровать эту оболочку из его отчета о токенах у меня не получилось, поэтому в таблице она учтена вместе с работой с магазином. Большая часть этого объема приходит из кэша: 80% у WebMCP и 89% у Playwright MCP и DOM. Даже T1 через WebMCP с единственным вызовом инструмента стоил около 47 тысяч токенов. Оболочка одинаковая для всех трех интерфейсов, поэтому разница между ними остается, просто в процентах она скромнее: на 65% меньше, чем у Playwright MCP, и на 69% меньше, чем у DOM.
 
-| Задача | Интерфейс | Total | Вызовы |
-| --- | --- | ---: | ---: |
-| T1 | WebMCP | 47 107 | 1 |
-| T1 | Playwright MCP | 105 675 | 8 |
-| T1 | DOM | 118 423 | 6 |
-| T2 | WebMCP | 86 772 | 5 |
-| T2 | Playwright MCP | 221 193 | 11 |
-| T2 | DOM | 233 564 | 12 |
-| T3 | WebMCP | 86 277 | 5 |
-| T3 | Playwright MCP | 195 334 | 12 |
-| T3 | DOM | 267 040 | 18 |
-| T4 | WebMCP | 46 255 | 1 |
-| T4 | Playwright MCP | 124 574 | 7 |
-| T4 | DOM | 166 336 | 6 |
-| T5 | WebMCP | 99 106 | 9 |
-| T5 | Playwright MCP | 386 640 | 24 |
-| T5 | DOM | 398 402 | 30 |
-| **T1-T5** | **WebMCP** | **365 517** | **21** |
+| Задача    | Интерфейс          |         Total | Вызовы |
+| --------- | ------------------ | ------------: | -----: |
+| T1        | WebMCP             |        47 107 |      1 |
+| T1        | Playwright MCP     |       105 675 |      8 |
+| T1        | DOM                |       118 423 |      6 |
+| T2        | WebMCP             |        86 772 |      5 |
+| T2        | Playwright MCP     |       221 193 |     11 |
+| T2        | DOM                |       233 564 |     12 |
+| T3        | WebMCP             |        86 277 |      5 |
+| T3        | Playwright MCP     |       195 334 |     12 |
+| T3        | DOM                |       267 040 |     18 |
+| T4        | WebMCP             |        46 255 |      1 |
+| T4        | Playwright MCP     |       124 574 |      7 |
+| T4        | DOM                |       166 336 |      6 |
+| T5        | WebMCP             |        99 106 |      9 |
+| T5        | Playwright MCP     |       386 640 |     24 |
+| T5        | DOM                |       398 402 |     30 |
+| **T1-T5** | **WebMCP**         |   **365 517** | **21** |
 | **T1-T5** | **Playwright MCP** | **1 033 416** | **62** |
-| **T1-T5** | **DOM** | **1 183 765** | **72** |
+| **T1-T5** | **DOM**            | **1 183 765** | **72** |
 
 ### Claude Opus 5.5
 
 Claude сам выбирал и делал каждый вызов через те же MCP-серверы. Я пересчитал в токены все, что он видел: схемы инструментов, каждый ответ браузера и финальный ответ. WebMCP потратил на 52% меньше токенов, чем Playwright MCP, и на 75% меньше, чем DOM. Разрыв с Playwright MCP здесь самый маленький из четырех прогонов, потому что с ним Claude работал экономно: искал нужные элементы через `browser_find` и читал только часть страницы.
 
-| Задача | Интерфейс | Total | Вызовы |
-| --- | --- | ---: | ---: |
-| T1 | WebMCP | 1 380 | 3 |
-| T1 | Playwright MCP | 2 619 | 6 |
-| T1 | DOM | 5 529 | 6 |
-| T2 | WebMCP | 1 201 | 4 |
-| T2 | Playwright MCP | 2 340 | 8 |
-| T2 | DOM | 6 243 | 6 |
-| T3 | WebMCP | 1 379 | 5 |
-| T3 | Playwright MCP | 3 041 | 13 |
-| T3 | DOM | 5 601 | 14 |
-| T4 | WebMCP | 1 382 | 3 |
-| T4 | Playwright MCP | 2 621 | 6 |
-| T4 | DOM | 5 531 | 6 |
-| T5 | WebMCP | 1 947 | 9 |
-| T5 | Playwright MCP | 4 566 | 23 |
-| T5 | DOM | 5 816 | 20 |
-| **T1-T5** | **WebMCP** | **7 289** | **24** |
+| Задача    | Интерфейс          |      Total | Вызовы |
+| --------- | ------------------ | ---------: | -----: |
+| T1        | WebMCP             |      1 380 |      3 |
+| T1        | Playwright MCP     |      2 619 |      6 |
+| T1        | DOM                |      5 529 |      6 |
+| T2        | WebMCP             |      1 201 |      4 |
+| T2        | Playwright MCP     |      2 340 |      8 |
+| T2        | DOM                |      6 243 |      6 |
+| T3        | WebMCP             |      1 379 |      5 |
+| T3        | Playwright MCP     |      3 041 |     13 |
+| T3        | DOM                |      5 601 |     14 |
+| T4        | WebMCP             |      1 382 |      3 |
+| T4        | Playwright MCP     |      2 621 |      6 |
+| T4        | DOM                |      5 531 |      6 |
+| T5        | WebMCP             |      1 947 |      9 |
+| T5        | Playwright MCP     |      4 566 |     23 |
+| T5        | DOM                |      5 816 |     20 |
+| **T1-T5** | **WebMCP**         |  **7 289** | **24** |
 | **T1-T5** | **Playwright MCP** | **15 187** | **56** |
-| **T1-T5** | **DOM** | **28 720** | **52** |
+| **T1-T5** | **DOM**            | **28 720** | **52** |
 
 ### Meta Muse Spark 1.3
 
 Meta Muse Spark 1.3 проходил задачи через тот же набор инструментов, и токены я пересчитал так же, как у Claude. В отличие от прогона Claude, сюда не вошли открытие страницы и получение списка инструментов WebMCP. WebMCP потратил на 83% меньше токенов, чем Playwright MCP, и на 90% меньше, чем DOM. Задачи T1 и T4 решались одним вызовом WebMCP, другим интерфейсам требовалось от 6 до 12 вызовов.
 
-| Задача | Интерфейс | Total | Вызовы |
-| --- | --- | ---: | ---: |
-| T1 | WebMCP | 700 | 1 |
-| T1 | Playwright MCP | 5 315 | 7 |
-| T1 | DOM | 9 040 | 6 |
-| T2 | WebMCP | 812 | 3 |
-| T2 | Playwright MCP | 5 424 | 12 |
-| T2 | DOM | 9 242 | 11 |
-| T3 | WebMCP | 858 | 3 |
-| T3 | Playwright MCP | 4 282 | 20 |
-| T3 | DOM | 9 328 | 19 |
-| T4 | WebMCP | 701 | 1 |
-| T4 | Playwright MCP | 5 550 | 12 |
-| T4 | DOM | 9 560 | 11 |
-| T5 | WebMCP | 1 552 | 7 |
-| T5 | Playwright MCP | 6 701 | 30 |
-| T5 | DOM | 11 160 | 29 |
-| **T1-T5** | **WebMCP** | **4 623** | **15** |
+| Задача    | Интерфейс          |      Total | Вызовы |
+| --------- | ------------------ | ---------: | -----: |
+| T1        | WebMCP             |        700 |      1 |
+| T1        | Playwright MCP     |      5 315 |      7 |
+| T1        | DOM                |      9 040 |      6 |
+| T2        | WebMCP             |        812 |      3 |
+| T2        | Playwright MCP     |      5 424 |     12 |
+| T2        | DOM                |      9 242 |     11 |
+| T3        | WebMCP             |        858 |      3 |
+| T3        | Playwright MCP     |      4 282 |     20 |
+| T3        | DOM                |      9 328 |     19 |
+| T4        | WebMCP             |        701 |      1 |
+| T4        | Playwright MCP     |      5 550 |     12 |
+| T4        | DOM                |      9 560 |     11 |
+| T5        | WebMCP             |      1 552 |      7 |
+| T5        | Playwright MCP     |      6 701 |     30 |
+| T5        | DOM                |     11 160 |     29 |
+| **T1-T5** | **WebMCP**         |  **4 623** | **15** |
 | **T1-T5** | **Playwright MCP** | **27 272** | **81** |
-| **T1-T5** | **DOM** | **48 330** | **76** |
+| **T1-T5** | **DOM**            | **48 330** | **76** |
 
 По числу вызовов WebMCP тоже впереди во всех прогонах: на весь набор задач ему понадобилось от 15 до 24 вызовов, остальным интерфейсам от 52 до 97.
 
@@ -256,11 +259,22 @@ Accessibility tree сильно помогает по сравнению с сы
 DOM. Сначала агент получает страницу целиком (4 624 токена), потом перечитывает блок `main`, чтобы найти форму (641 токен). Начало этого блока:
 
 ```html
-<main><p class="notice" role="status" data-testid="status">Synthetic store for a
-browser-agent benchmark. No payment is processed.</p><section class="hero"><div>
-<p class="eyebrow">WebMCP Browser Benchmark</p><h1>Shop the signal,<br><em>skip the
-noise.</em></h1><p class="hero-copy">A deterministic store built to compare browser
-automation with an in-page, typed agent interface.</p><div class="hero-actions">...
+<main>
+  <p class="notice" role="status" data-testid="status">
+    Synthetic store for a browser-agent benchmark. No payment is processed.
+  </p>
+  <section class="hero">
+    <div>
+      <p class="eyebrow">WebMCP Browser Benchmark</p>
+      <h1>Shop the signal,<br /><em>skip the noise.</em></h1>
+      <p class="hero-copy">
+        A deterministic store built to compare browser automation with an
+        in-page, typed agent interface.
+      </p>
+      <div class="hero-actions">...</div>
+    </div>
+  </section>
+</main>
 ```
 
 До формы с количеством здесь еще далеко.
@@ -269,12 +283,12 @@ Playwright MCP. Агент находит форму через `browser_find` �
 
 ```yaml
 - generic [ref=f2e491]:
-  - paragraph [ref=f2e492]: Choose your finish
-  - combobox "Color" [ref=f2e495]:
-    - option "black (8 in stock)" [selected]
-    - option "blue (0 in stock)" [disabled]
-  - spinbutton "Quantity" [ref=f2e497]: "1"
-  - button "Add to cart" [ref=f2e498] [cursor=pointer]
+    - paragraph [ref=f2e492]: Choose your finish
+    - combobox "Color" [ref=f2e495]:
+        - option "black (8 in stock)" [selected]
+        - option "blue (0 in stock)" [disabled]
+    - spinbutton "Quantity" [ref=f2e497]: "1"
+    - button "Add to cart" [ref=f2e498] [cursor=pointer]
 ```
 
 Дальше ему нужно ввести 2 в поле, нажать кнопку и отдельно проверить подытог.
@@ -284,8 +298,13 @@ WebMCP. Один вызов `set_cart_item`, и в ответ сразу при�
 ```json
 {
   "lines": [
-    { "productId": "hp-sonic-lite", "name": "Sonic Lite ANC",
-      "color": "black", "quantity": 2, "unitPriceCents": 12900 }
+    {
+      "productId": "hp-sonic-lite",
+      "name": "Sonic Lite ANC",
+      "color": "black",
+      "quantity": 2,
+      "unitPriceCents": 12900
+    }
   ],
   "subtotalCents": 25800,
   "shippingCents": 500,
